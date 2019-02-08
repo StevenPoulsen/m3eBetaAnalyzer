@@ -237,7 +237,7 @@
 }
 .m2e .back .base {
   position: absolute;
-  bottom: 3mm;
+  bottom: 1mm;
   right:3mm;
   color: #fff;
   padding: 0.2mm 2mm;
@@ -279,7 +279,7 @@
 }
 .printModel .actionsWrapper .actionStats {
   overflow:hidden;
-  line-height:1em;
+  line-height:1.4em;
 }
 .printModel .actionsWrapper .actionName {
   width: 40%;

@@ -22,7 +22,7 @@
       </div>
     </filter-section>
 
-    <filter-section name.bind="'Rules'" count.bind="filterService.rules.length" filter.bind="'rules'">
+    <filter-section name.bind="'Abilities'" count.bind="filterService.rules.length" filter.bind="'rules'">
       <div class="inputWrapper" repeat.for="rule of filterService.rules">
         <label class="capitalize"><input type="checkbox" name="${rule}" checked.bind="filterService.filters.rules[rule]" change.delegate="filterService.filterChange()" /> ${rule}</label>
       </div>

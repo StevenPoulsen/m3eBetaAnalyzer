@@ -1,0 +1,289 @@
+.m3e {
+  font-size: 2mm;
+  line-height: 3mm;
+}
+
+.m3e .printModel {
+  width: 141mm;
+  height: 120mm;
+  overflow: hidden;
+}
+
+.m3e .printModel .front,
+.m3e .printModel .back {
+  width: 70mm;
+  height: 120mm;
+  float:left;
+  position: relative;
+}
+
+.m3e .printModel .front {
+  border-right: .2mm dashed #000;
+}
+
+.m3e .front .imageTextColorPicker {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 6mm;
+  height: 3mm;
+  line-height: 3mm;
+  cursor: pointer;
+  background: #fff;
+  border: solid #000 .2mm;
+  border-top-style: none;
+  text-align:center;
+}
+
+@media print {
+  .m3e .front .imageTextColorPicker {
+    display: none;
+  }
+}
+
+.m3e .front .picture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.m3e .front .picture img {
+  position: relative;
+  width: 100%;
+  z-index: -1;
+}
+
+.m3e .front .picture label {
+  position: absolute;
+  top:20mm;
+  left: 0;
+}
+
+@media print {
+  .m2e .front .picture label {
+    display:none;
+  }
+}
+
+.m3e .front .topLeft {
+  position: absolute;
+  top: 3mm;
+  left: 3mm;
+}
+
+.m3e .front .topLeft .name {
+  font-size: 5mm;
+  line-height: 5mm;
+  font-variant: small-caps;
+}
+
+.m3e .front .topLeft .characteristics {
+  font-style: italic;
+}
+
+.m3e .front .topRight {
+  position: absolute;
+  top: 3mm;
+  right: 3mm;
+  text-align: center;
+}
+
+.m3e .front .topRight .costValue {
+  font-size: 5mm;
+  line-height: 1em;
+  font-weight: bold;
+  text-shadow: none;
+  width: 2.5ch;
+  margin: 0 0 .8mm;
+}
+
+.m3e .front .topRight .costHeadline {
+  text-transform: uppercase;
+}
+
+.m3e .front .topLeft.white .name,
+.m3e .front .topLeft.white .characteristics,
+.m3e .front .topLeft.white .keywords,
+.m3e .front .topRight.white .costValue,
+.m3e .front .topRight.white .costHeadline {
+  color: #fff;
+  text-shadow: 0 0 .2mm #000;
+}
+
+.m3e .front .stats {
+  position: absolute;
+  top: 40mm;
+  left: 0;
+  right: 0;
+  height: 17mm;
+  overflow: hidden;
+  text-align: center;
+}
+
+.m3e .front .stats:before {
+  content:'';
+  position: absolute;
+  top: 8mm;
+  left: 50%;
+  border: 1mm solid #999;
+  border-radius: 100%;
+  width: 250mm;
+  height: 250mm;
+  margin: 0 0 0 -125mm;
+  background: #fff none;
+  z-index: -1;
+}
+
+.m3e .front .stats .stat {
+  height: 6.4mm;
+  width: 6.4mm;
+  border: .8mm #999 solid;
+  border-radius: 100%;
+  text-align: center;
+  padding: 1.2mm;
+  margin: 0 .5mm;
+  display: inline-block;
+  background: #fff;
+  position:relative;
+}
+
+.m3e .front .stats .stat:first-child {
+  margin-left: 2mm;
+}
+
+.m3e .front .stats .stat:first-child,
+.m3e .front .stats .stat:last-child {
+  top: -1mm;
+}
+.m3e .front .stats .stat:nth-child(even){
+  top: -3mm;
+}
+
+.m3e .front .stats .stat .value {
+  font-size: 4mm;
+  font-weight: bold;
+  line-height: 1em;
+  margin: 0 0 .8mm;
+}
+
+.m3e .front .stats .stat .headline {
+  font-size: 1.8mm;
+  line-height: 1.6mm;
+  font-variant: small-caps;
+}
+
+.m3e .front .stats .stat.faction {
+  height: 12.8mm;
+  width: 12.8mm;
+  border-width: 1mm;
+  overflow: hidden;
+  padding: 0;
+}
+.m3e .front .stats .stat.faction img {
+  width: 100%
+}
+.m3e .front .abilities {
+  position: absolute;
+  background: #fff none;
+  left:0;
+  right:0;
+  bottom: 9.6mm;
+  top: 57mm;
+  padding: 0 3mm;
+}
+.m3e .front .abilities .abilitiesHeadline {
+  font-size: 1.8mm;
+  line-height: 1em;
+  text-transform: uppercase;
+  position:relative;
+  text-align: center;
+}
+.m3e .front .abilities .abilitiesHeadline:before {
+  content: '';
+  position:absolute;
+  top:50%;
+  left:0;
+  right:0;
+  border-bottom: .2mm solid #999;
+}
+.m3e .front .abilities .abilitiesHeadline span {
+  background: #fff;
+  padding: 0 1mm;
+  position: relative;
+  z-index: 1;
+}
+
+.m3e .front .abilities .abilitiesWrapper .ability {
+  margin-bottom: 1mm;
+}
+
+.m3e .front .abilities .abilitiesWrapper .ability span:first-child {
+  font-weight: bold;
+  font-variant: small-caps;
+}
+
+.m3e .front .health {
+  position: absolute;
+  bottom: 0;
+  left:0;
+  right:0;
+  height: 9.6mm;
+}
+
+.m3e .front .health .wounds {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.m3e .front .health .wounds .wound {
+  line-height: 2.8mm;
+  height: 2.8mm;
+  width: 2.8mm;
+  display: inline-block;
+  border: .1mm solid #333;
+  border-radius: 100%;
+  margin: 0 .8mm;
+  position: relative;
+}
+
+.m3e .front .health .headline {
+  font-size: 1.6mm;
+  line-height: 1em;
+  text-transform: uppercase;
+  margin: 1.2mm 0 0;
+}
+
+.m3e .back .name {
+  margin: 2.4mm auto 3mm;
+  text-align:center;
+  font-size: 2mm;
+  line-height: 2mm;
+  font-variant: small-caps;
+}
+.m3e .back .actionsWrapper {
+  margin: 0 3mm;
+}
+.m3e .printModel .actionsWrapper .actionHead {
+  color: #666;
+  padding: 0 0 1mm;
+  border-bottom: .3mm dotted #ccc;
+}
+.m3e .printModel .actionsWrapper .actionHead:before {
+  display: none;
+}
+.m3e .printModel .actionsWrapper .actionName {
+  font-variant: small-caps;
+}
+.m3e .back .base {
+  position: absolute;
+  bottom: 2.4mm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: bold;
+}
+.m3e .back .base span {
+  font-size: 1.8mm;
+  vertical-align: bottom;
+}
