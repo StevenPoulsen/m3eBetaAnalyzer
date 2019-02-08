@@ -1,0 +1,53 @@
+<template>
+  <require from="../converters/key-value-converter"></require>
+  <require from="./filterSection"></require>
+  <div class="filterMenu">
+    <div class="headline">Filters</div>
+
+    <filter-section name.bind="'Factions'" filter.bind="'faction'">
+      <div class="inputWrapper" repeat.for="faction of filterService.factions">
+        <label><input type="checkbox" name="${faction}" checked.bind="filterService.filters.faction[faction]" change.delegate="filterService.filterChange()" />${faction}</label>
+      </div>
+    </filter-section>
+
+    <filter-section name.bind="'Characteristics'" count.bind="filterService.types.length" filter.bind="'types'">
+      <div class="inputWrapper" repeat.for="type of filterService.types">
+        <label><input type="checkbox" name="${type}" checked.bind="filterService.filters.types[type]" change.delegate="filterService.filterChange()" /> ${type}</label>
+      </div>
+    </filter-section>
+
+    <filter-section name.bind="'Keywords'" count.bind="filterService.keywords.length" filter.bind="'keywords'">
+      <div class="inputWrapper" repeat.for="keyword of filterService.keywords">
+        <label><input type="checkbox" name="${keyword}" checked.bind="filterService.filters.keywords[keyword]" change.delegate="filterService.filterChange()" /> ${keyword}</label>
+      </div>
+    </filter-section>
+
+    <filter-section name.bind="'Rules'" count.bind="filterService.rules.length" filter.bind="'rules'">
+      <div class="inputWrapper" repeat.for="rule of filterService.rules">
+        <label class="capitalize"><input type="checkbox" name="${rule}" checked.bind="filterService.filters.rules[rule]" change.delegate="filterService.filterChange()" /> ${rule}</label>
+      </div>
+    </filter-section>
+
+    <filter-section name.bind="'Cost'">
+      <div class="inputWrapper">
+        <label>Min.: <input type="number" value.bind="filterService.costMin" input.delegate="filterService.filterChange()" /></label>
+        <label>Max.: <input type="number" value.bind="filterService.costMax" input.delegate="filterService.filterChange()" /></label>
+      </div>
+    </filter-section>
+
+    <filter-section name.bind="'Text'">
+      <div class="inputWrapper">
+        <label><input type="text" class="fullWidth" value.bind="filterService.freeText & debounce" /></label>
+      </div>
+    </filter-section>
+    
+    <filter-section name.bind="'Crew builder'" if.bind="filterService.crewBuilderService.isBuilding">
+      <div class="inputWrapper">
+        <label><input type="checkbox" checked.bind="filterService.crewLegalOnly" change.delegate="filterService.filterChange()" /> Crew Legal</label>
+      </div>
+      <div class="inputWrapper">
+        <label><input type="checkbox" checked.bind="filterService.taxFreeOnly" change.delegate="filterService.filterChange()" /> Tax free</label>
+      </div>
+    </filter-section>
+  </div>
+</template>

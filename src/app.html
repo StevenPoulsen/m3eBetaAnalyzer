@@ -1,0 +1,11 @@
+<template>
+  <require from="./styles/reset.css"></require>
+  <require from="./styles/styles.css"></require>
+  <!--nav class="main-menu">
+    <a click.delegate="navigateTo('data')" class="${current==='data'?'active':''}">Data</a>
+    <a click.delegate="navigateTo('summary')" class="${current==='summary'?'active':''}">Summary</a>
+  </nav-->
+  <main class="main" hammer-swipe.call="menuSwipe($event)">
+  <router-view></router-view>
+  </main>
+</template>

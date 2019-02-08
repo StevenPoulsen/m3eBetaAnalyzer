@@ -1,0 +1,33 @@
+<template>
+  <require from="../converters/key-value-converter"></require>
+  <require from="../components/model"></require>
+  <require from="../components/faction"></require>
+  <require from="../components/filter"></require>
+  <require from="../components/sort"></require>
+  <require from="../components/version"></require>
+  <require from="../components/install"></require>
+  <require from="../components/crewBuilder"></require>
+  <require from="../components/crews"></require>
+
+  <div class="menus ${leftMenuShown?'shown':''}">
+    <version></version>
+    <filter></filter>
+    <sort></sort>
+    <crews></crews>
+    <install></install>
+  </div>
+  <div>
+    <faction repeat.for="faction of data.factions | keys" faction.bind="data.factions[faction]">
+      <model repeat.for="model of data.factions[faction].models" model.bind="model"></model>
+    </faction>
+  </div>
+  <div>Portions of the materials used are copyrighted works of Wyrd Miniatures, LLC, in the United States of
+    America and elsewhere. All rights reserved, Wyrd Miniatures, LLC. This material is not official and is not
+    endorsed by Wyrd Miniatures, LLC.</div>
+  <div class="menus right ${rightMenuShown?'shown':''}" if.bind="crewBuilderService.isBuilding">
+    <crew-builder></crew-builder>
+  </div>
+  <div class="mobileMenuToggler leftMenuToggler" hammer-tap.call="toggleLeftMenu()">Menus</div>
+  <div class="mobileMenuToggler rightMenuToggler" hammer-tap.call="toggleRightMenu()" if.bind="crewBuilderService.isBuilding">Crew</div>
+  <div class="remainingSoulStonesSummary ${showRemaining?'shown':''}">${remaining}/${crewBuilderService.currentCrew.soulStones}</div>
+</template>

@@ -1,0 +1,31 @@
+<template>
+  <require from="../converters/key-value-converter"></require>
+  <div class="crewBuilder">
+    <div class="message ${messageShow} ${messageType}" innerhtml.bind="message"></div>
+    <div class="inputWrapper">
+      <label class="soulStones">SS: <span>${remaining}</span>/<input type="number" value.bind="crewBuilderService.currentCrew.soulStones" /></label>
+    </div>
+    <div class="crewModels">
+      <div class="section ${type}" repeat.for="type of crew.models | keys" if.bind="crew.models[type].length">
+        <div class="crewModelType">${typeName[type]}</div>
+        <div class="crewModel" repeat.for="model of crew.models[type]">
+          <span>${model.name}</span> <span class="cost">${model.name === crew.leader ? '★':model.cost}</span><span class="remove" hammer-tap.call="removeModel(model.id)"></span>
+        </div>
+      </div>
+    </div>
+    <div class="listOptions">
+      <div class="inputWrapper">
+        <label><input type="text" placeholder="Crew Name" value.bind="crewName" /></label>
+      </div>
+      <div class="inputWrapper" if.bind="crewName">
+        <div class="button ${saveSuccess?'success':''}" hammer-tap.call="save()">Save</div>
+      </div>
+    </div>
+  </div>
+  <div class="crewBuilder">
+    <div class="button" hammer-tap.call="printCrew()">Print crew</div>
+  </div>
+  <div class="crewBuilder">
+    <div class="button" hammer-tap.call="endCrewBuilder()">End Crew building</div>
+  </div>
+</template>

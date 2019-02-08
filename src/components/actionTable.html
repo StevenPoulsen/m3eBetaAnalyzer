@@ -1,0 +1,13 @@
+<template>
+  <require from="./actionRow"></require>
+  <div class="actionHead" if.bind="actions && actions.length">
+    <span class="actionName">${name}</span>
+    <span class="actionRg">Rg</span>
+    <span class="actionStat">Stat</span>
+    <span class="actionRst">Rst</span>
+    <span class="actionTN">TN</span>
+  </div>
+
+  <action-row repeat.for="action of actions" action.bind="action" media.bind="media"></action-row>
+
+</template>

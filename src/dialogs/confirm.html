@@ -1,0 +1,11 @@
+<template>
+  <ux-dialog class="dialog confirm">
+    <ux-dialog-body>
+      <div>${texts.text}</div>
+      <div class="inputWrapper">
+        <div hammer-tap.call="controller.ok()" class="button">${texts.ok}</div>
+        <div hammer-tap.call="controller.cancel()" class="button">${texts.no}</div>
+      </div>
+    </ux-dialog-body>
+  </ux-dialog>
+</template>

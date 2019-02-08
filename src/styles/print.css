@@ -1,0 +1,310 @@
+@page {
+  size: A4;
+}
+
+.printStyleWrapper {
+  margin: 10px auto;
+  text-align:center;
+}
+
+@media print {
+  .printStyleWrapper {
+    display: none;
+  }
+}
+
+.printSuit {
+  width:2mm;
+  height:2mm;
+  vertical-align: middle;
+}
+
+.printModel {
+  page-break-inside: avoid;
+  border: .25mm solid #000;
+  position: relative;
+}
+
+.m2e {
+  font-size: 1.7mm;
+  line-height: 2mm;
+}
+
+.m2e .printModel {
+  width: 179.5mm;
+  height: 64.5mm;
+  overflow:hidden;
+}
+
+.m2e .printModel .front,
+.m2e .printModel .back {
+  width: 89.5mm;
+  height: 64.5mm;
+  float:left;
+  position: relative;
+}
+
+.m2e .printModel .front {
+  border: .25mm none #000;
+  border-right-style: dashed;
+}
+
+.m2e .front .picture {
+  width: 35mm;
+  height: 28mm;
+  position: absolute;
+  top: 3mm;
+  left: 4mm;
+  overflow:hidden;
+}
+
+.m2e .front .picture img {
+  width: 100%;
+}
+
+.m2e .front .picture label {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+@media print {
+  .m2e .front .picture label {
+    display:none;
+  }
+}
+
+.m2e .front .cost {
+  position: absolute;
+  top: 3mm;
+  right: 3mm;
+  text-align: center;
+  line-height: 1em;
+}
+.m2e .front .cost .costHeadline {
+  text-transform: uppercase;
+  font-size: 1mm;
+}
+.m2e .front .cost .costValue {
+  font-size: 5mm;
+  line-height: 1em;
+}
+
+.m2e .front .statsWrapper {
+  position: absolute;
+  right: 3mm;
+  top: 3mm;
+  width: 44mm;
+  height: 28mm;
+}
+
+.m2e .front .statsWrapper .name {
+  text-transform: uppercase;
+  font-size: 3mm;
+  margin: 0 0 1mm 0;
+}
+.m2e .front .statsWrapper .characteristics {
+  font-style: italic;
+}
+.m2e .front .statsWrapper .keywords {
+  font-size: 2mm;
+  margin: 1mm 0 2mm;
+}
+.m2e .front .statsWrapper .stats .headerRow {
+  line-height: 3.8mm;
+  font-size: 1.8mm;
+  overflow: hidden;
+  color: #fff;
+  width: 40mm;
+  text-transform: uppercase;
+  border: .1mm solid #333;
+  position: relative;
+}
+.m2e .front .statsWrapper .stats .headerRow:before {
+  content:'';
+  position: absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  border-bottom: 5mm solid #333;
+  z-index: -1;
+}
+.m2e .front .statsWrapper .stats .row {
+  line-height: 4mm;
+  font-size: 2.3mm;
+  border: .1mm solid #333;
+  font-weight: bold;
+  overflow:hidden;
+  width:40mm;
+}
+.m2e .front .statsWrapper .stats .stat {
+  width: 7.9mm;
+  display: inline-block;
+  float:left;
+  text-align: center;
+  border: .1mm none #333;
+  border-left-style: solid;
+}
+.m2e .front .statsWrapper .stats .stat:first-child {
+  border-left-style: none;
+  width: 8mm;
+}
+.m2e .front .statsWrapper .stats .headerRow .stat::first-letter{
+  font-size: 2.3mm;
+}
+.m2e .front .statsWrapper .wounds {
+  position: relative;
+  overflow:hidden;
+  margin: 1mm 0 0;
+}
+.m2e .front .statsWrapper .wounds .wound {
+  position: relative;
+  width: 2mm;
+  height: 2mm;
+  border: 0.1mm solid #333;
+  border-radius: 100%;
+  float:left;
+}
+.m2e .front .statsWrapper .wounds .wound:nth-child(even) {
+  margin: 3.5mm 0 0 0;
+}
+
+.m2e .front .abilities {
+  position: absolute;
+  top: 31mm;
+  left:3mm;
+  right:3mm;
+  bottom:3mm;
+  overflow:hidden;
+}
+
+.m2e .front .abilities .abilitiesHeadline {
+  position: relative;
+  text-align:center;
+}
+.m2e .front .abilities .abilitiesHeadline span {
+  font-size: 2mm;
+  font-weight: bold;
+  background: #fff none;
+  padding: 0 1mm;
+}
+.m2e .front .abilities .abilitiesHeadline:before {
+  content:'';
+  position:absolute;
+  border:.1mm none #333;
+  border-bottom-style: solid;
+  height: 1mm;
+  left: 0;
+  right:0;
+  z-index: -1;
+}
+
+.m2e .front .abilitiesWrapper {
+  column-count: 2;
+  column-fill:auto;
+  margin: 1mm 0 0 0;
+  font-size: 1.8mm;
+  line-height: 2.5mm;
+  height: 28mm;
+}
+
+.m2e .front .abilitiesWrapper .ability {
+  margin: 0 0 1mm;
+}
+
+.m2e .front .abilitiesWrapper .ability span:first-child {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.m2e .back .name {
+  position: absolute;
+  left:7mm;
+  bottom:0;
+  width:64.5mm;
+  height:7mm;
+  transform:rotate(-90deg);
+  transform-origin: bottom left;
+}
+.m2e .back .name span {
+  line-height: 7mm;
+  text-align: center;
+  display:block;
+  font-size: 2mm;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.m2e .back .base {
+  position: absolute;
+  bottom: 3mm;
+  right:3mm;
+  color: #fff;
+  padding: 0.2mm 2mm;
+  line-height: 2mm;
+  overflow: hidden;
+}
+.m2e .back .base:before {
+  content:'';
+  position: absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  border-bottom: 5mm solid #333;
+  z-index: -1;
+}
+
+.m2e .back .actionsWrapper {
+  margin: 0 0 0 7mm;
+}
+
+.printModel .actionsWrapper .actionHead {
+  color: #fff;
+  overflow:hidden;
+  padding: .5mm 1mm;
+  margin: 1mm 0;
+  position:relative;
+  line-height: 1em;
+}
+.printModel .actionsWrapper .actionHead:before {
+  content:'';
+  position: absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  border-bottom: 5mm solid #333;
+  z-index: -1;
+}
+.printModel .actionsWrapper .actionStats {
+  overflow:hidden;
+  line-height:1em;
+}
+.printModel .actionsWrapper .actionName {
+  width: 40%;
+  font-weight: bold;
+  float:left;
+}
+
+.printModel .actionsWrapper .actionRg,
+.printModel .actionsWrapper .actionStat,
+.printModel .actionsWrapper .actionRst,
+.printModel .actionsWrapper .actionTN {
+  width: 15%;
+  text-align: center;
+  float:left;
+}
+.printModel .actionsWrapper .actionRules {
+  padding: .5mm 1mm 1mm;
+}
+.printModel .actionsWrapper .actionTrigger {
+  margin: .5mm 0 0 2.5mm;
+  padding-left: 2.5mm;
+  text-indent: -2.5mm;
+}
+.printModel .actionsWrapper .actionTriggerName {
+  font-weight: bold;
+  font-style: italic;
+}
+

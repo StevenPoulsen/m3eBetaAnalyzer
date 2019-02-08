@@ -1,0 +1,71 @@
+<template>
+  <require from="../styles/print.css"></require>
+  <require from="../components/actionTable"></require>
+  <require from="../converters/suit-value-converter"></require>
+  <require from="../converters/blobToUrl-value-converter"></require>
+  <div class="printStyleWrapper">
+    <label><select value.bind="edition">
+      <option value="m2e">M2E Format</option>
+      <option value="m3e">M3E Format</option>
+    </select></label>
+    <span class="button" hammer-tap.call="print()">Print</span>
+    <span class="button" hammer-tap.call="back()">Back</span>
+  </div>
+  <div if.bind="edition === 'm2e'" class="m2e">
+    <div class="printModel" repeat.for="model of models">
+      <div class="front">
+        <div class="picture">
+          <img if.bind="images[model.name]" src.bind="images[model.name][0] | blobToUrl" />
+          <label><input type="file" files.bind="images[model.name]" accept="image/*" /></label>
+        </div>
+        <div class="cost">
+          <div class="costHeadline">Cost</div>
+          <div class="costValue">${model.stats.cost.value}</div>
+        </div>
+        <div class="statsWrapper">
+          <div class="name">${model.name}</div>
+          <div class="characteristics" innerhtml.bind="characteristics(model)"></div>
+          <div class="keywords">${model.keywords.join(", ")}</div>
+          <div class="stats">
+            <div class="headerRow">
+              <div class="stat">DF</div>
+              <div class="stat">WP</div>
+              <div class="stat">WD</div>
+              <div class="stat">Mv</div>
+              <div class="stat">Sz</div>
+            </div>
+            <div class="row">
+              <div class="stat">${model.stats.df.value}<span if.bind="model.stats.df.suit" innerhtml.bind="model.stats.df.suit | suit:'print'"></span></div>
+              <div class="stat">${model.stats.wp.value}<span if.bind="model.stats.wp.suit" innerhtml.bind="model.stats.wp.suit | suit:'print'"></span></div>
+              <div class="stat">${model.stats.health.value}<span if.bind="model.stats.health.suit" innerhtml.bind="model.stats.health.suit | suit:'print'"></span></div>
+              <div class="stat">${model.stats.mv.value}<span if.bind="model.stats.mv.suit" innerhtml.bind="model.stats.mv.suit | suit:'print'"></span></div>
+              <div class="stat">${model.size.height}</div>
+            </div>
+          </div>
+          <div class="wounds">
+            <div class="wound" repeat.for="i of +model.stats.health.value"></div>
+          </div>
+        </div>
+        <div class="abilities">
+          <div class="abilitiesHeadline"><span>Abilities</span></div>
+          <div class="abilitiesWrapper">
+            <div class="ability" repeat.for="rule of model.rules">
+              <span innerhtml.bind="ruleName(rule)"></span> <span innerhtml.bind="rule.text | suit:'print'"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="back">
+        <div class="name"><span>${model.name}</span></div>
+        <div class="base">${model.size.base}mm</div>
+        <div class="actionsWrapper">
+          <action-table if.bind="model.attacks" actions.bind="model.attacks" name.bind="'Attack Actions'" media.bind="'print'"></action-table>
+          <action-table if.bind="model.tacticals" actions.bind="model.tacticals" name.bind="'Tactical Actions'" media.bind="'print'"></action-table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div if.bind="edition === 'm3e'" class="m3e">
+    Under construction
+  </div>
+</template>

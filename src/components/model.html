@@ -1,0 +1,34 @@
+<template>
+  <require from="../converters/key-value-converter"></require>
+  <require from="../converters/suit-value-converter"></require>
+  <require from="./actionTable"></require>
+  <div class="model">
+    <div class="quickLine expandable ${shown?'shown':''}">
+      <div hammer-tap.call="toggle()">
+        <span class="name">${model.name}</span>
+        <span class="quickShow" repeat.for="quickShow of filterService.options.quickShow">${getQuickShow(quickShow)}</span>
+      </div>
+      <div if.bind="crewBuilderService.isBuilding" hammer-tap.call="addToCrew()">
+        <span class="addToCrew">+</span>
+      </div>
+    </div>
+    <div class="details" if.bind="shown">
+      <div class="types" innerhtml.bind="characteristics()"></div>
+      <div class="keywords">${model.keywords.join(", ")}</div>
+      <div class="size">${model.size.base}mm, Sz ${model.size.height}</div>
+      <div class="factions">${model.factions.join(", ")}</div>
+      <div class="stat" repeat.for="[name,stat] of getStats()">
+        ${name}: ${stat.value} <span if.bind="stat.suit" innerhtml.bind="stat.suit | suit"></span>
+      </div>
+      <div class="rules">
+        <div class="rule" repeat.for="rule of model.rules">
+          <span class="ruleName" innerhtml.bind="ruleName(rule)"></span>
+          <span innerhtml.bind="rule.text | suit"></span>
+        </div>
+      </div>
+      <action-table if.bind="model.attacks" actions.bind="model.attacks" name.bind="'Attack Actions'"></action-table>
+      <action-table if.bind="model.tacticals" actions.bind="model.tacticals" name.bind="'Tactical Actions'"></action-table>
+
+    </div>
+  </div>
+</template>

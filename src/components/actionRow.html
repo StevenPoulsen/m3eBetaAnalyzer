@@ -1,0 +1,18 @@
+<template>
+  <require from="../converters/suit-value-converter"></require>
+  <div class="actionStats">
+    <span class="actionName"><span if.bind="action.bonus" innerhtml.bind="'F'|suit:media"></span> ${action.name}</span>
+    <span class="actionRg" innerhtml.bind="action.rg | suit:media">${action.rg}</span>
+    <span class="actionStat" innerhtml.bind="action.stat | suit:media">${action.stat}</span>
+    <span class="actionRst">${action.rst}</span>
+    <span class="actionTN" innerhtml.bind="action.tn | suit:media">${action.tn}</span>
+  </div>
+  <div class="actionRules">
+    <div class="actionRule" innerhtml.bind="action.rule | suit:media"></div>
+    <div class="actionTrigger" repeat.for="trigger of action.triggers">
+      <span class="actionTriggerSuit suit" innerhtml.bind="trigger.suit | suit:media"></span>
+      <span class="actionTriggerName">${trigger.name}:</span>
+      <span class="actionTriggerRule" innerhtml.bind="trigger.rule | suit:media"></span>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,43 @@
+<template>
+  <require from="../converters/key-value-converter"></require>
+  <require from="../converters/date-value-converter"></require>
+  <require from="../converters/map-value-converter"></require>
+  <require from="../converters/json-value-converter"></require>
+  <h1>Feed Faction data</h1>
+  <div class="inputWrapper">
+  <label>
+    Version:
+    <select value.bind="version">
+      <option model.bind="null">Select version</option>
+      <option repeat.for="version of dataService.versionCodes" model.bind="version">${version}</option>
+    </select>
+  </label>
+  </div>
+  <div class="inputWrapper">
+  <label>
+    Faction:
+    <select value.bind="faction">
+      <option model.bind="null">Select faction</option>
+      <option repeat.for="[faction,data] of dataService.getFactionMap()" model.bind="faction">${data.displayName}</option>
+    </select>
+  </label>
+  </div>
+  <div class="inputWrapper">
+  <label>Rules:
+    <textarea placeholder="Copy entire text from faction pdf to here" value.bind="rules"></textarea>
+  </label>
+  </div>
+  <div class="inputWrapper">
+  <button hammer-tap.call="handleFactionConsume()">Consume data</button><span>${error}</span>
+  </div>
+
+  <h1>Consumed faction data</h1>
+  <div if.bind="versions" repeat.for="version of versions">
+    <h2>Beta version: ${version.version}</h2>
+    <ul>
+    <li repeat.for="[faction, data] of version.factions | map">${dataService.getFactionDisplayName(faction)} - Consumed ${data.timestamp | date}</li>
+    </ul>
+    <label>Show Data:<input type="checkbox" checked.bind="showData[version.version]" /></label>
+    <textarea if.bind="showData[version.version]" value.bind="version | json"></textarea>
+  </div>
+</template>

@@ -1,0 +1,14 @@
+<template>
+  <require from="./filterSection"></require>
+  <div class="filterMenu">
+    <div class="headline">Version</div>
+    <div class="inputWrapper">
+      <label>Beta:
+        <select value.bind="nextVersion" change.delegate="filterChange()">
+          <option model.bind="null">Select version</option>
+          <option repeat.for="version of dataService.versionCodes" model.bind="version">${version}</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</template>

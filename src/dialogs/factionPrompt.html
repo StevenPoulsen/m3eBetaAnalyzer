@@ -1,0 +1,10 @@
+<template>
+  <ux-dialog>
+    <ux-dialog-head>
+      Choose faction
+    </ux-dialog-head>
+    <ux-dialog-body>
+      <div class="factionIcon ${faction}" repeat.for="faction of factions" hammer-tap.call="controller.ok(faction)"><img src="${'/images/'+getImage(faction)}" alt="${faction}"/></div>
+    </ux-dialog-body>
+  </ux-dialog>
+</template>

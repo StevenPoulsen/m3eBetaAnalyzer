@@ -1,0 +1,33 @@
+<template>
+  <require from="../converters/key-value-converter"></require>
+  <require from="./filterSection"></require>
+  <div class="sortMenu">
+    <div class="headline">List options</div>
+    <filter-section name.bind="'Sort'">
+      <div class="inputWrapper">
+        <label>
+          Sort by:
+          <select name="modelSort" value.bind="filterService.options.sort.modelSort" change.delegate="filterChange()" >
+            <option repeat.for="sort of filterService.sortValues"
+                    value.bind="sort">
+              ${sort}
+            </option>
+          </select>
+        </label>
+      </div>
+      <div class="inputWrapper">
+        <label>Reverse:
+          <input name="reverseSort" type="checkbox" checked.bind="filterService.options.sort.reverseSort" change.delegate="filterChange()" />
+        </label>
+      </div>
+    </filter-section>
+    <filter-section name.bind="'Quick show'">
+    <div class="inputWrapper" repeat.for="quickShow of filterService.quickShows">
+      <label>
+        <input type="checkbox" value.bind="quickShow" checked.bind="filterService.options.quickShow" change.delegate="filterChange()"/>
+        ${quickShow}
+      </label>
+    </div>
+    </filter-section>
+  </div>
+</template>

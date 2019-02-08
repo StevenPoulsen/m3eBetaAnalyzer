@@ -1,0 +1,11 @@
+<template>
+  <div class="filterSectionName expandable ${show?'shown':''}" hammer-tap.call="toggle()">${name} <span class="filterCount" if.bind="count">${count}</span></div>
+  <div show.bind="show">
+    <div class="modify">
+      <div if.bind="filter" hammer-tap.call="all()">All</div>
+      <div if.bind="filter" hammer-tap.call="none()">None</div>
+      <div if.bind="filter" hammer-tap.call="invert()">Invert</div>
+    </div>
+    <slot></slot>
+  </div>
+</template>
