@@ -1,12 +1,15 @@
 import {HttpClient} from 'aurelia-fetch-client';
+import * as localForage from 'localforage';
 
 interface VersionDataEntry {
   version: string,
   timestamp: number,
-  factions: any;
+  factions: any,
+  appVersion:string
 }
 
 export class DataService {
+  private appVersion: string = "0.1";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"displayName": "Arcanists"},
@@ -18,12 +21,28 @@ export class DataService {
     "resser":{"displayName":"Resser"},
     "tt":{"displayName":"Ten Thunders"}
   };
+  private icons = {
+    'Arcanists': 'arcanists.png',
+    'Bayou': 'bayou.png',
+    'Guild': 'guild.png',
+    'Neverborn': 'neverborn.png',
+    "Resurrectionist": "resser.png",
+    "Ten Thunders": "tt.png"
+  };
   public versionCodes: string[] = ["1.23","1.31","2.6.19","2.7.19"];
   public currentVersion: string;
 
   constructor() {
     this.loadDataFromCache();
     this.currentVersion = this.getLatestVersionCode();
+  }
+
+  getAppVersion() {
+    return this.appVersion;
+  }
+
+  getFactionImage(faction){
+    return this.icons[faction] || (faction.toLowerCase() + ".png");
   }
 
   public getLatestVersionCode(): string {
@@ -276,7 +295,7 @@ export class DataService {
       factions = {};
     }
     factions[data.name] = data;
-    this.data = {version: version, timestamp: new Date().getTime(), factions}
+    this.data = {version: version, timestamp: new Date().getTime(), factions, appVersion: this.appVersion};
     this.saveData();
   }
 
@@ -286,9 +305,17 @@ export class DataService {
 
   public getDataVersion(version: string, anew:boolean = false):Promise<VersionDataEntry> {
     if (anew || !this.data) {
-      this.data = this.loadDataFromCache();
+      return this.loadDataFromCache().then(data => {
+        this.data = data;
+        return this.ensureDataIsUpToDate(version);
+      });
+    } else {
+      return this.ensureDataIsUpToDate(version);
     }
-    if (this.data.version === version) {
+  }
+
+  private ensureDataIsUpToDate(version:string): Promise<VersionDataEntry> {
+    if (this.data && this.data.version === version && this.data.appVersion === this.appVersion) {
       return new Promise<VersionDataEntry>(((resolve, reject) => {
         resolve(this.data);
       }));
@@ -302,22 +329,18 @@ export class DataService {
     return client.fetch("data/"+version.replace(/\./g,"_")+".json")
       .then(response => response.json())
       .then(data => {
+        data.appVersion = self.appVersion;
         self.data = data;
         return data;
       });
   }
 
-  private loadDataFromCache(): any {
-    const cacheDataString = localStorage.getItem("data");
-    if (cacheDataString) {
-      this.data = JSON.parse(cacheDataString);
-      return this.data;
-    }
-    return {};
+  private loadDataFromCache(): Promise<VersionDataEntry> {
+    return localForage.getItem("data");
   }
 
   private saveData(): void {
-    localStorage.setItem("data",JSON.stringify(this.data));
+    localForage.setItem("data",this.data);
   }
   
 }

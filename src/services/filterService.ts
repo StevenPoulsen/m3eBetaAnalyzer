@@ -1,5 +1,6 @@
-import {CrewBuilderService} from "./crewBuilderService";
+import {CrewBuilderService, BuyProblem} from "./crewBuilderService";
 import {autoinject,observable} from "aurelia-framework";
+import * as localForage from 'localforage';
 
 @autoinject()
 export class FilterService {
@@ -89,9 +90,11 @@ export class FilterService {
                   && (!this.freeText || this.containsText(model))) {
                   if (this.crewBuilderService.isBuilding) {
                     model.tax = this.crewBuilderService.calculateModelTax(model);
+                    const buyProblem:BuyProblem = this.crewBuilderService.buyProblem(model);
                     if (this.crewBuilderService.isBuilding &&
-                      (!this.crewLegalOnly || this.crewBuilderService.isLegal(model)) &&
+                      (!this.crewLegalOnly || !buyProblem.hide) &&
                       (!this.taxFreeOnly || model.tax <= 0)) {
+                      model.problem = this.crewLegalOnly ? buyProblem.name : '';
                       filteredData.factions[faction].models.push(model);
                     }
                   } else {
@@ -200,24 +203,26 @@ export class FilterService {
   }
 
   private loadFilters() {
-    const cacheString = localStorage.getItem("filters");
-    if (cacheString) {
-      this.filters = JSON.parse(cacheString);
-    }
+    localForage.getItem("filters").then(value => {
+      if (value) {
+        this.filters = value;
+      }
+    });
   }
 
   private saveFilters() {
-    localStorage.setItem("filters", JSON.stringify(this.filters));
+    localForage.setItem("filters", this.filters);
   }
 
   private loadOptions() {
-    const cacheString = localStorage.getItem("options");
-    if (cacheString) {
-      this.options = JSON.parse(cacheString);
-    }
+    localForage.getItem("options").then(value => {
+      if (value) {
+        this.options = value;
+      }
+    });
   }
 
   private saveOptions() {
-    localStorage.setItem("options", JSON.stringify(this.options));
+    localForage.setItem("options", this.options);
   }
 }

@@ -4,6 +4,7 @@ import {autoinject, observable} from 'aurelia-framework';
 import {TrackingService} from "../services/trackingService";
 import {SuitValueConverter} from "../converters/suit-value-converter";
 import {AppRouter} from "aurelia-router";
+import * as localForage from 'localforage';
 
 @autoinject()
 export class Print {
@@ -23,9 +24,7 @@ export class Print {
 
   private loadCrew():void {
     const models:any[] = [];
-    const cacheString = localStorage.getItem("printCrew");
-    if (cacheString) {
-      const crew = JSON.parse(cacheString);
+    localForage.getItem("printCrew").then((crew:any) => {
       if (crew && crew.models) {
         let amount:number = 0;
         const types = [];
@@ -49,11 +48,11 @@ export class Print {
           }
         }
       }
-    }
+    });
   }
 
   editionChanged(newValue, oldValue) {
-    localStorage.setItem("printEdition", newValue);
+    localForage.setItem("printEdition", newValue);
   }
 
   togglePictureTextColor(model) {
@@ -61,12 +60,14 @@ export class Print {
   }
 
   private setEdition():void {
-    const cacheString = localStorage.getItem("printEdition");
-    if (cacheString) {
-      this.edition = cacheString;
-    } else {
-      this.edition = "m2e";
-    }
+    localForage.getItem("printEdition").then((printEdition:string) => {
+      if (printEdition) {
+        this.edition = printEdition;
+      } else {
+        this.edition = "m2e";
+      }
+    });
+
   }
 
   print() {

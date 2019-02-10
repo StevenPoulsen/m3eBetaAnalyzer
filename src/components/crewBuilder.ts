@@ -6,6 +6,7 @@ import {TrackingService} from "../services/trackingService";
 import {DialogService} from "aurelia-dialog";
 import {Confirm} from "../dialogs/confirm";
 import {AppRouter} from "aurelia-router";
+import * as localForage from 'localforage';
 
 @autoinject()
 export class CrewBuilder {
@@ -110,7 +111,7 @@ export class CrewBuilder {
   }
 
   printCrew() {
-    localStorage.setItem("printCrew", JSON.stringify(this.crewBuilderService.getCrew()));
+    localForage.setItem("printCrew", this.crewBuilderService.getCrew());
     this.router.navigate("print");
   }
 }

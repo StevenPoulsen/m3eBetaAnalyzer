@@ -123,6 +123,10 @@ module.exports = ({ production, server, extractCss, coverage, analyze, karma } =
         ] : ['style-loader', ...cssRules]
       },
       {
+        test: /\.exec\.js$/,
+        use: [ 'script-loader' ]
+      },
+      {
         test: /\.css$/i,
         issuer: [{ test: /\.html$/i }],
         // CSS required in templates cannot be extracted safely

@@ -3,12 +3,12 @@
   <require from="../converters/suit-value-converter"></require>
   <require from="./actionTable"></require>
   <div class="model">
-    <div class="quickLine expandable ${shown?'shown':''}">
-      <div hammer-tap.call="toggle()">
+    <div class="quickLine ${shown?'shown':''}">
+      <div class="expandable ${shown?'shown':''}" hammer-tap.call="toggle()">
         <span class="name">${model.name}</span>
         <span class="quickShow" repeat.for="quickShow of filterService.options.quickShow">${getQuickShow(quickShow)}</span>
       </div>
-      <div if.bind="crewBuilderService.isBuilding" hammer-tap.call="addToCrew()">
+      <div if.bind="crewBuilderService.isBuilding && !model.problem" hammer-tap.call="addToCrew()">
         <span class="addToCrew">+</span>
       </div>
     </div>

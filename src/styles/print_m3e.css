@@ -61,7 +61,7 @@
 }
 
 @media print {
-  .m2e .front .picture label {
+  .m3e.front .picture label {
     display:none;
   }
 }
@@ -241,7 +241,7 @@
   height: 2.8mm;
   width: 2.8mm;
   display: inline-block;
-  border: .1mm solid #333;
+  border: .2mm solid #333;
   border-radius: 100%;
   margin: 0 .8mm;
   position: relative;

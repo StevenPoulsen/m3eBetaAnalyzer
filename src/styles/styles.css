@@ -252,6 +252,7 @@ ux-dialog-head {
   font-weight: bold;
   font-size: 16px;
   display:block;
+  cursor: pointer;
 }
 
 .model .details {
@@ -462,4 +463,8 @@ ux-dialog-head {
   .remainingSoulStonesSummary.shown {
     transform: translate3d(0, 30px, 0);
   }
+}
+.appVersion {
+  margin: 10px 0 0;
+  color: #333;
 }

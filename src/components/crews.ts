@@ -8,13 +8,17 @@ import {MenuService} from "../services/menuService";
 
 @autoinject()
 export class Crews {
-  private crews;
+  private crews = [];
 
   constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator, private filterService: FilterService, private dialogService:DialogService, private menuService: MenuService) {
     ea.subscribe("crewSave", () => {
-      this.crews = this.crewBuilderService.getCrews();
+      this.crewBuilderService.getCrews().then(crews => {
+        this.crews = crews;
+      });
     });
-    this.crews = this.crewBuilderService.getCrews();
+    this.crewBuilderService.getCrews().then(crews => {
+      this.crews = crews;
+    });
   }
 
   loadCrew(crewName: string) {
@@ -48,9 +52,10 @@ export class Crews {
         no: "Cancel"
       }}).whenClosed(response => {
         if (!response.wasCancelled) {
-          this.crewBuilderService.deleteCrew(crewName);
-          this.crews = this.crewBuilderService.getCrews();
-          this.filterService.filterChange();
+          this.crewBuilderService.deleteCrew(crewName).then(crews => {
+            this.crews = crews;
+            this.filterService.filterChange();
+          });
         }
     });
   }

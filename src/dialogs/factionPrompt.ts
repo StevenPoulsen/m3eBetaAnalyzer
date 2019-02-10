@@ -1,21 +1,14 @@
 import {autoinject} from 'aurelia-framework';
 import {DialogController} from "aurelia-dialog";
 import {useView} from 'aurelia-framework';
+import {DataService} from "../services/dataService";
 
 @autoinject()
 @useView('./factionPrompt.html')
 export class FactionPrompt {
   private factions = [];
-  private icons = {
-    'Arcanists': 'arcanists.png',
-    'Bayou': 'bayou.png',
-    'Guild': 'guild.png',
-    'Neverborn': 'neverborn.png',
-    "Resurrectionist": "resser.png",
-    "Ten Thunders": "tt.png"
-  };
 
-  constructor(private controller: DialogController){}
+  constructor(private controller: DialogController, private dataService: DataService){}
 
   activate(factions) {
     if (factions && factions.factions) {
@@ -24,6 +17,6 @@ export class FactionPrompt {
   }
 
   getImage(faction){
-    return this.icons[faction] || (faction.toLowerCase() + ".png");
+    return this.dataService.getFactionImage(faction);
   }
 }

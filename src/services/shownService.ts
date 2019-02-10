@@ -1,3 +1,5 @@
+import * as localForage from 'localforage';
+
 export class ShownService {
   private shown;
 
@@ -14,20 +16,21 @@ export class ShownService {
   }
 
   public getShown(type:string, id:string):boolean {
-    return this.shown[type] && !!this.shown[type][id];
+    return this.shown && this.shown[type] && !!this.shown[type][id];
   }
 
   private loadShown():void {
-    const cacheString = localStorage.getItem("shownCache");
-    if (cacheString) {
-      this.shown = JSON.parse(cacheString);
-    } else {
-      this.shown = {};
-    }
+    localForage.getItem("shownCache").then( shown => {
+      if (shown) {
+        this.shown = shown;
+      } else {
+        this.shown = {};
+      }
+    });
   }
 
   private saveShown():void {
-    localStorage.setItem("shownCache", JSON.stringify(this.shown));
+    localForage.setItem("shownCache", this.shown);
   }
 
 }

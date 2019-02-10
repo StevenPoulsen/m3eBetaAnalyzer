@@ -30,4 +30,5 @@
   <div class="mobileMenuToggler leftMenuToggler" hammer-tap.call="toggleLeftMenu()">Menus</div>
   <div class="mobileMenuToggler rightMenuToggler" hammer-tap.call="toggleRightMenu()" if.bind="crewBuilderService.isBuilding">Crew</div>
   <div class="remainingSoulStonesSummary ${showRemaining?'shown':''}">${remaining}/${crewBuilderService.currentCrew.soulStones}</div>
+  <div clsas="appVersion">App Version: ${dataService.getAppVersion()}</div>
 </template>
