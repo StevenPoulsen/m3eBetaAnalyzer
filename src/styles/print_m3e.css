@@ -61,7 +61,7 @@
 }
 
 @media print {
-  .m3e.front .picture label {
+  .m3e .front .picture label {
     display:none;
   }
 }
