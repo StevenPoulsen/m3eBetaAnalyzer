@@ -9,7 +9,7 @@ interface VersionDataEntry {
 }
 
 export class DataService {
-  private appVersion: string = "0.1";
+  private appVersion: string = "0.2";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"displayName": "Arcanists"},
