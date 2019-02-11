@@ -7,7 +7,7 @@ export class FilterService {
   sortValues: string[] = ["wyrd","name","cost"]
   filters:any = {faction: {}, types: {}, keywords:{}, rules:{}};
   options:any = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
-  costMax: number = 15;
+  costMax: number = 16;
   costMin: number = 0;
   factions: any = [];
   types: any = [];
@@ -88,18 +88,18 @@ export class FilterService {
                 if ((model.stats.cost.value >= this.costMin && model.stats.cost.value <= this.costMax)
                   && (!FilterService.isFiltered(model.rules, this.filters.rules))
                   && (!this.freeText || this.containsText(model))) {
-                  if (this.crewBuilderService.isBuilding) {
-                    model.tax = this.crewBuilderService.calculateModelTax(model);
-                    const buyProblem:BuyProblem = this.crewBuilderService.buyProblem(model);
-                    if (this.crewBuilderService.isBuilding &&
-                      (!this.crewLegalOnly || !buyProblem.hide) &&
-                      (!this.taxFreeOnly || model.tax <= 0)) {
-                      model.problem = this.crewLegalOnly ? buyProblem.name : '';
+                      if (this.crewBuilderService.isBuilding) {
+                      model.tax = this.crewBuilderService.calculateModelTax(model);
+                      const buyProblem:BuyProblem = this.crewBuilderService.buyProblem(model);
+                      if (this.crewBuilderService.isBuilding &&
+                        (!this.crewLegalOnly || !buyProblem.hide) &&
+                        (!this.taxFreeOnly || model.tax <= 0)) {
+                        model.problem = this.crewLegalOnly ? buyProblem.name : '';
+                        filteredData.factions[faction].models.push(model);
+                      }
+                    } else {
                       filteredData.factions[faction].models.push(model);
                     }
-                  } else {
-                    filteredData.factions[faction].models.push(model);
-                  }
                 }
               }
             }
