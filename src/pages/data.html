@@ -23,12 +23,17 @@
   </label>
   </div>
   <div class="inputWrapper">
-  <label>Rules:
+  <label>Model Rules:
     <textarea placeholder="Copy entire text from faction pdf to here" value.bind="rules"></textarea>
   </label>
   </div>
   <div class="inputWrapper">
-  <button hammer-tap.call="handleFactionConsume()">Consume data</button><span>${error}</span>
+    <label>Upgrade Rules:
+      <textarea placeholder="Copy entire text from faction upgrades pdf to here" value.bind="upgrades"></textarea>
+    </label>
+  </div>
+  <div class="inputWrapper">
+  <button hammer-tap.call="handleFactionConsume()">Consume model data</button><span>${error}</span>
   </div>
 
   <h1>Consumed faction data</h1>

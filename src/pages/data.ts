@@ -5,6 +5,7 @@ import {autoinject} from 'aurelia-framework';
 export class Data {
   private faction: string = "";
   private rules: string = "";
+  private upgrades: string = "";
   private error: string = "";
   private version: string;
   private versions:any = [];
@@ -39,13 +40,19 @@ export class Data {
   }
 
   handleFactionConsume() {
-    if (!this.faction || !this.rules || !this.version) {
+    if (!this.faction || (!this.rules && !this.upgrades) || !this.version) {
       this.error = "Missing input";
       return false;
     }
-    this.dataService.consumeFactionRules(this.version, this.faction, this.rules);
+    if (this.rules) {
+      this.dataService.consumeFactionRules(this.version, this.faction, this.rules);
+    }
+    if (this.upgrades) {
+      this.dataService.consumeFactionUpgrades(this.version, this.faction, this.upgrades);
+    }
     this.rules = "";
     this.faction = "";
+    this.upgrades = "";
     this.reloadVersions(this);
   }
 }

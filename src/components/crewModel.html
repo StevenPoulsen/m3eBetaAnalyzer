@@ -1,0 +1,8 @@
+<template>
+  <div class="crewModel" >
+    <span hammer-tap.call="editCrewModel()">${model.name}</span> <span class="cost">${model.name === crew.leader ? '★':model.cost}</span><span class="remove" hammer-tap.call="removeModel()"></span>
+  </div>
+  <div class="crewModel upgrade" if.bind="model.upgrade">
+    <span hammer-tap.call="editCrewModel()">${model.upgrade.name}</span> <span class="cost">${model.upgrade.cost}</span><span class="remove" hammer-tap.call="removeUpgrade()"></span>
+  </div>
+</template>

@@ -36,10 +36,6 @@ export class CrewBuilder {
     });
   }
 
-  removeModel(id:number) {
-    this.crewBuilderService.removeModel(id);
-  }
-
   updateRemainingSoulStones() {
     this.remaining = this.crewBuilderService.getSoulStonesRemaining();
   }

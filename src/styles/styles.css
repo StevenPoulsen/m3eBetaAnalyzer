@@ -3,6 +3,7 @@
 body {
   font-family: 'Merriweather', serif;
   padding: 0 0 60px;
+  overflow-y: scroll;
 }
 
 h1 {
@@ -128,7 +129,8 @@ ul li {
   transform: translate3d(200px,0,0);
 }
 .menus.right {
-  margin: 0 0 50px 400px;
+  margin: 0 0 0 400px;
+  padding: 0 0 50px 0;
 }
 .menus.right.shown {
   transform: translate3d(-200px,0,0);
@@ -286,37 +288,37 @@ ux-dialog-head {
   font-weight: bold;
   text-transform: capitalize;
 }
-.model .details .actionHead {
+.details .actionHead {
   background: #000;
   color: #fff;
   display: flex;
   padding: 2px 4px;
   margin: 4px 0;
 }
-.model .details .actionStats {
+.details .actionStats {
   display: flex;
   padding: 4px;
 }
-.model .details .actionName {
+.details .actionName {
   width: 40%;
   font-weight: bold;
 }
-.model .details .actionRg,
-.model .details .actionStat,
-.model .details .actionRst,
-.model .details .actionTN {
+.details .actionRg,
+.details .actionStat,
+.details .actionRst,
+.details .actionTN {
   width: 15%;
   text-align: center;
 }
-.model .details .actionRules {
+.details .actionRules {
   padding: 2px 4px;
 }
-.model .details .actionTrigger {
+.details .actionTrigger {
   margin: 4px 0 0 20px;
   padding-left: 20px;
   text-indent: -20px;
 }
-.model .details .actionTriggerName {
+.details .actionTriggerName {
   font-weight: bold;
   font-style: italic;
 }
@@ -389,6 +391,12 @@ ux-dialog-head {
   flex-grow: 1;
 }
 
+.crewModel.upgrade {
+  font-size: .8em;
+  margin-left: 8px;
+  color: #666;
+}
+
 .listOptions {
   padding: 4px 0;
   border: 1px none #000;
@@ -404,6 +412,50 @@ ux-dialog-head {
 }
 .remainingSoulStonesSummary {
   display:none;
+}
+.appVersion {
+  margin: 10px 0 0;
+  color: #333;
+}
+.editModel {
+  display:flex;
+}
+.editModel div {
+  text-align: center;
+  flex-grow: 1;
+  width: 50%;
+}
+.editModel div input {
+  width: 50px;
+}
+.editModel div span {
+  width: 100%;
+}
+.editUpgrades {
+  width: 500px;
+}
+.editUpgrades .upgrade {
+  padding: 4px;
+  border: 1px solid #333;
+}
+.editUpgrades .upgrade .text {
+  padding: 4px;
+  line-height: 1.1em;
+}
+.editUpgrades .upgrade .text.clearAbove {
+  padding-top: 20px;
+}
+.editUpgrades .upgrade .text .name {
+  font-weight: bold;
+}
+.editUpgrades .upgrade .limitations {
+  text-transform: capitalize;
+  text-align: center;
+}
+.editUpgrades .upgrade .limitations div {
+  text-transform: uppercase;
+  line-height: 1.1em;
+  padding: 8px 0 4px;
 }
 
 @media only screen and (max-width: 800px) {
@@ -463,8 +515,4 @@ ux-dialog-head {
   .remainingSoulStonesSummary.shown {
     transform: translate3d(0, 30px, 0);
   }
-}
-.appVersion {
-  margin: 10px 0 0;
-  color: #333;
 }

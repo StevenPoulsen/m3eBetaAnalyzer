@@ -1,0 +1,27 @@
+<template>
+  <require from="../converters/suit-value-converter"></require>
+  <require from="../converters/key-value-converter"></require>
+  <require from="./actionTable"></require>
+  <div class="upgrade">
+    <div class="quickLine ${shown?'shown':''}">
+      <div class="expandable ${shown?'shown':''}" hammer-tap.call="toggle()">
+        <span class="name">${upgrade.name}</span>
+        <span class="quickShow">Cost: ${upgrade.cost}</span>
+      </div>
+      <div hammer-tap.call="toggleForModel()">
+        <span class="addToCrew" if.bind="!added && !model.upgrade">+</span>
+        <span class="addToCrew" if.bind="added">-</span>
+      </div>
+    </div>
+    <div class="details" if.bind="shown">
+      <div class="text ${text.endsWith(':')?'clearAbove':''}" repeat.for="text of upgrade.texts">
+        <span innerhtml.bind="getText(text) | suit"></span>
+        <action-table if.bind="upgrade.actions && isActionText(text)" actions.bind="upgrade.actions" name.bind="upgrade.actions[0].type"></action-table>
+      </div>
+      <div class="limitations">
+        <div>Limitations</div>
+        <span>${limitations}</span>
+      </div>
+    </div>
+  </div>
+</template>

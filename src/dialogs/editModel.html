@@ -1,0 +1,24 @@
+<template>
+  <require from="../components/upgrade"></require>
+    <ux-dialog class="dialog">
+      <ux-dialog-head>
+        ${crewModel.name}
+      </ux-dialog-head>
+      <ux-dialog-body>
+        <div class="editModel">
+          <div>
+            Cost: <input type="number" value.bind="cost" />
+          </div>
+          <div>
+            <span class="remove" hammer-tap.call="removeModel()"></span>
+          </div>
+        </div>
+        <div class="editUpgrades">
+          <upgrade repeat.for="upgrade of upgrades" upgrade.bind="upgrade" model.bind="crewModel"></upgrade>
+        </div>
+        <div class="inputWrapper">
+          <div hammer-tap.call="confirm()" class="button">Close</div>
+        </div>
+      </ux-dialog-body>
+    </ux-dialog>
+</template>

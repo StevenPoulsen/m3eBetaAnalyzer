@@ -5,31 +5,31 @@ interface VersionDataEntry {
   version: string,
   timestamp: number,
   factions: any,
-  appVersion:string
+  appVersion: string
 }
 
 export class DataService {
-  private appVersion: string = "0.2";
+  private appVersion: string = "0.3";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"displayName": "Arcanists"},
-    "bayou":{"displayName":"Bayou"},
-    "dmh":{"displayName":"Dead mans hand"},
-    "guild":{"displayName":"The Guild"},
-    "neverborn":{"displayName":"Neverborn"},
-    "outcasts":{"displayName":"Outcasts"},
-    "resser":{"displayName":"Resser"},
-    "tt":{"displayName":"Ten Thunders"}
+    "bayou": {"displayName": "Bayou"},
+    "dmh": {"displayName": "Dead mans hand"},
+    "guild": {"displayName": "The Guild"},
+    "neverborn": {"displayName": "Neverborn"},
+    "outcasts": {"displayName": "Outcasts"},
+    "resser": {"displayName": "Resser"},
+    "tt": {"displayName": "Ten Thunders"}
   };
-  private icons = {
-    'Arcanists': 'arcanists.png',
-    'Bayou': 'bayou.png',
-    'Guild': 'guild.png',
-    'Neverborn': 'neverborn.png',
-    "Resurrectionist": "resser.png",
-    "Ten Thunders": "tt.png"
+  private factionKeys = {
+    'Arcanists': 'arcanists',
+    'Bayou': 'bayou',
+    'Guild': 'guild',
+    'Neverborn': 'neverborn',
+    "Resurrectionist": "resser",
+    "Ten Thunders": "tt"
   };
-  public versionCodes: string[] = ["1.23","1.31","2.6.19","2.7.19"];
+  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19"];
   public currentVersion: string;
 
   constructor() {
@@ -41,23 +41,20 @@ export class DataService {
     return this.appVersion;
   }
 
-  getFactionImage(faction){
-    return this.icons[faction] || (faction.toLowerCase() + ".png");
+  getFactionImage(faction:string) {
+    return this.getFactionKey(faction) + ".png";
+  }
+
+  getFactionKey(faction:string) {
+    return this.factionKeys[faction] || faction.toLowerCase();
   }
 
   public getLatestVersionCode(): string {
-    return this.versionCodes[this.versionCodes.length-1];
+    return this.versionCodes[this.versionCodes.length - 1];
   }
 
   public getFactionMap(): any {
     return DataService.getObjectAsMap(this.factions);
-  }
-
-  public getDataAsMap(version: string): any {
-    if (this.data && this.data[version]) {
-      return DataService.getObjectAsMap(this.data[version].factions);
-    }
-    return new Map();
   }
 
   public static getObjectAsMap(obj): any {
@@ -96,7 +93,7 @@ export class DataService {
   }
 
   public consumeFactionRules(version, faction, rules): void {
-    const data = {name:faction, models:[], timestamp: new Date().getTime()};
+    const data = {name: faction, models: [], timestamp: new Date().getTime()};
     const lines = rules.split("\n");
     let state = "name", model, actionState = "stats", emptyLines = 0, ongoingSkill: boolean = false;
     for (const line of lines) {
@@ -156,7 +153,7 @@ export class DataService {
               ongoingSkill = true;
               const nameSplit = split[0].match(/^([^+]+)\+([0-9])(.*)$/i);
               if (nameSplit) {
-                let name = nameSplit[1]+nameSplit[3];
+                let name = nameSplit[1] + nameSplit[3];
                 let value = +nameSplit[2];
                 const nameType = name.match(/^([^\(]+) \(([^)]+)\)$/);
                 if (nameType) {
@@ -248,12 +245,127 @@ export class DataService {
             }
             break;
         }
-      }catch (e) {
+      } catch (e) {
         console.error("Unable to parse line ", t, model, e);
         return;
       }
     }
-    this.addFactionData(version,data);
+    this.addFactionData(version, data);
+  }
+
+  public consumeFactionUpgrades(version: string, faction: string, upgrades: string): void {
+    const data = {name: faction, upgrades: [], timestamp: new Date().getTime()};
+    const lines: string[] = upgrades.split("\n");
+    let state: string = "new", upgrade:any, emptyLines: number = 0, text:string = "", limitations:string = "", action:any, actionState:string;
+    for (const line of lines) {
+      const t = line.trim();
+      try {
+        if (!t) {
+          emptyLines++;
+          if (state === "limitations" && limitations && upgrade) {
+            upgrade.limitations.special = this.extractLimitations("special",limitations);
+            upgrade.limitations.restricted = this.extractLimitations("restricted",limitations);
+            upgrade.limitations.plentiful = this.extractLimitations("plentiful", limitations);
+            state = "name";
+          } else if (state === "content") {
+            if (text && upgrade) {
+              upgrade.texts.push(text);
+              text = "";
+            }
+          } else if (state === "action") {
+            if (action && upgrade){
+              upgrade.actions.push(action);
+              action = null;
+              state = "content";
+            }
+          }
+          continue;
+        }
+        emptyLines = 0;
+        switch (state) {
+          case "new":
+            if (t === "Cost: SS") {
+              state = "content";
+              upgrade = {texts: [], abilities: [], minionAbilities: [], name: "", cost: 0, limitations: {}, actions: []};
+            }
+            break;
+          case "name":
+            if (t.toLowerCase() === "limitations") {
+              if (upgrade) {
+                data.upgrades.push(upgrade);
+              }
+              state = "new";
+            } else {
+              upgrade.name = t;
+            }
+            break;
+          case "content":
+            if (t.match(/^[0-9]+$/)) {
+              upgrade.cost = t;
+              state = "limitations";
+              limitations = "";
+              break;
+            }
+            text = this.appendText(text, t);
+            if (t.endsWith(".") || t.endsWith(":")) {
+              upgrade.texts.push(text);
+              if (text.match(/.*gains the following.* Actions?:/i)) {
+                state = "action";
+              }
+              text = "";
+            }
+            break;
+          case "action":
+            if (!action) {
+              action = {type:t.split("Rg")[0].trim()};
+              break;
+            }
+            let actionStats = this.splitActionStats(t);
+            if (actionStats) {
+              actionState = "stats";
+            }
+            switch (actionState) {
+              case "stats":
+                Object.assign(action, actionStats);
+                actionState = "rule";
+                break;
+              case "rule":
+              case "triggers":
+                let newTrigger = t.match(/^([cmtr]+) (.*)/i);
+                if (!newTrigger) {
+                  if (actionState === "triggers") {
+                    action[actionState][action[actionState].length - 1].rule = this.appendText(action[actionState][action[actionState].length - 1].rule, t);
+                  } else {
+                    action[actionState] = this.appendText(action[actionState], t);
+                  }
+                } else {
+                  let triggerName = newTrigger[2].split(":");
+                  action.triggers = action.triggers || [];
+                  action.triggers.push({
+                    suit: newTrigger[1],
+                    name: triggerName[0],
+                    rule: triggerName[1]
+                  });
+                  actionState = "triggers";
+                }
+                break;
+
+            }
+            break;
+          case "limitations":
+            limitations += t;
+            break;
+        }
+      } catch (e) {
+        console.error("Unable to parse upgrade line: ", t, upgrade, e);
+      }
+    }
+    if (upgrade) {
+      data.upgrades.push(upgrade);
+    }
+
+
+    this.addFactionUpgrades(version, data);
   }
 
   private appendText(target, text): string {
@@ -265,45 +377,78 @@ export class DataService {
     return target;
   }
 
-  private splitStatSuit(statValue):any {
+  private splitStatSuit(statValue): any {
     if (!statValue) {
-      return {value:0};
+      return {value: 0};
     }
     const match = statValue.match(/([0-9]+)([a-z])/i);
     if (match && match.length === 3) {
-      return {value:+match[1],suit:match[2]};
+      return {value: +match[1], suit: match[2]};
     }
-    return {value:+statValue};
+    return {value: +statValue};
   }
 
-  private splitActionStats(line):any {
+  private splitActionStats(line): any {
     const match = line.match(/^(.+) (([a-z]?[0-9][0-9]?")|(x)|(-)) (([0-9][0-9]?[a-z\-+]*)|(x)|(-)) ([^ ]*) (([0-9][0-9]?[a-z]?)|(-)|(x))?$/i);
     if (match && match.length === 15) {
       if (match[1].match(/[Ff][A-Z"].*/)) {
-        return {name:match[1].substr(1),rg:match[2],stat:match[6],rst:match[10],tn:match[11],bonus:true};
+        return {name: match[1].substr(1), rg: match[2], stat: match[6], rst: match[10], tn: match[11], bonus: true};
       }
-      return {name:match[1],rg:match[2],stat:match[6],rst:match[10],tn:match[11]};
+      return {name: match[1], rg: match[2], stat: match[6], rst: match[10], tn: match[11]};
     }
     return null;
   }
 
-  private addFactionData(version:string,data:any):void {
+  private extractLimitations(name:string, limitations:string) {
+    const match = limitations.toLowerCase().match(new RegExp(name.toLowerCase() + " ?.([^()]+)"));;
+    if (match) {
+      if (name.toLowerCase() === "plentiful") {
+        return +match[1];
+      }
+      return match[1].split(", ");
+    }
+    return null;
+  }
+
+  private addFactionData(version: string, data: any): void {
     let factions;
     if (this.data) {
       factions = this.data.factions;
     } else {
       factions = {};
     }
-    factions[data.name] = data;
-    this.data = {version: version, timestamp: new Date().getTime(), factions, appVersion: this.appVersion};
+
+    if (factions[data.name]) {
+      this.factions[data.name].models = data.models;
+    } else {
+      factions[data.name] = data;
+    }
+    this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion};
     this.saveData();
   }
 
-  public getData(anew:boolean = false):Promise<VersionDataEntry> {
-     return this.getDataVersion(this.currentVersion, anew);
+  private addFactionUpgrades(version: string, data: any): void {
+    let factions:any;
+    if (this.data) {
+      factions = this.data.factions;
+    } else {
+      factions = {};
+    }
+    if (factions[data.name]) {
+      factions[data.name].upgrades = data.upgrades;
+    } else {
+      factions[data.name] = data;
+    }
+    console.log("Adding faction upgrades", data, factions);
+    this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion};
+    this.saveData();
   }
 
-  public getDataVersion(version: string, anew:boolean = false):Promise<VersionDataEntry> {
+  public getData(anew: boolean = false): Promise<VersionDataEntry> {
+    return this.getDataVersion(this.currentVersion, anew);
+  }
+
+  public getDataVersion(version: string, anew: boolean = false): Promise<VersionDataEntry> {
     if (anew || !this.data) {
       return this.loadDataFromCache().then(data => {
         this.data = data;
@@ -314,7 +459,7 @@ export class DataService {
     }
   }
 
-  private ensureDataIsUpToDate(version:string): Promise<VersionDataEntry> {
+  private ensureDataIsUpToDate(version: string): Promise<VersionDataEntry> {
     if (this.data && this.data.version === version && this.data.appVersion === this.appVersion) {
       return new Promise<VersionDataEntry>(((resolve, reject) => {
         resolve(this.data);
@@ -323,14 +468,15 @@ export class DataService {
     return this.fetchDataFile(version);
   }
 
-  private fetchDataFile(version: string):Promise<VersionDataEntry> {
+  private fetchDataFile(version: string): Promise<VersionDataEntry> {
     const client = new HttpClient();
     const self = this;
-    return client.fetch("data/"+version.replace(/\./g,"_")+".json")
+    return client.fetch("data/" + version.replace(/\./g, "_") + ".json?noCache="+new Date().getTime())
       .then(response => response.json())
       .then(data => {
         data.appVersion = self.appVersion;
         self.data = data;
+        self.saveData();
         return data;
       });
   }
@@ -339,8 +485,8 @@ export class DataService {
     return localForage.getItem("data");
   }
 
-  private saveData(): void {
-    localForage.setItem("data",this.data);
+  private saveData(): void {   
+    localForage.setItem("data", this.data);
   }
-  
+
 }

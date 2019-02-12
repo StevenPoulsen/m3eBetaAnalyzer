@@ -46,7 +46,37 @@ export class CrewBuilderService {
 
   @computedFrom('currentCrew', 'lastModified')
   get hasChanges(): boolean {
-    return !!this.currentCrew && this.currentCrew.models.length && !!this.lastModified && (!this.currentCrew.lastSave || this.lastModified > this.currentCrew.lastSave);
+    return !!this.currentCrew && !!this.getCrewModelCount() && !!this.lastModified && (!this.currentCrew.lastSave || this.lastModified > this.currentCrew.lastSave);
+  }
+
+  getCrewModelCount() {
+    if (!this.currentCrew) {
+      return 0;
+    }
+    let count = 0;
+    for (const type in this.currentCrew.models) {
+      if (this.currentCrew.models.hasOwnProperty(type)) {
+        count += this.currentCrew.models[type] ? this.currentCrew.models[type].length : 0;
+      }
+    }
+    return count;
+  }
+
+  getCrewUpgradesCount() {
+    const count = {};
+    if (!this.currentCrew) {
+      return count;
+    }
+    for (const model of this.currentCrew.models) {
+      if (model.upgrade) {
+        if (!count[model.upgrade.name]) {
+          count[model.upgrade.name] = 1;
+        } else {
+          count[model.upgrade.name]++;
+        }
+      }
+    }
+    return count;
   }
 
   setCrewName(crewName: string) {
@@ -83,6 +113,24 @@ export class CrewBuilderService {
     this.currentCrew.models[type].push(this.extractCrewModel(model));
     this.publishUpdateEvent();
     this.lastModified = new Date().getTime();
+  }
+
+  public editModel(crewModel, newCost: number) {
+    const model = this.getCurrentCrewModel(crewModel.id);
+    if (!model) {
+      return;
+    }
+    let hasChange = false;
+    if (model.cost !== newCost) {
+      model.cost = newCost;
+      hasChange = true;
+    }
+    model.upgrades = model.upgrades || [];
+    if (hasChange) {
+      this.publishUpdateEvent();
+      this.lastModified = new Date().getTime();
+    }
+    return;
   }
 
   public removeModel(id) {
@@ -129,6 +177,48 @@ export class CrewBuilderService {
         }
       }
     }
+  }
+
+  addCrewModelUpgrade(crewModel, upgrade): void {
+    if (!this.currentCrew) {
+      return;
+    }
+    const model = this.getCurrentCrewModel(crewModel.id);
+    if (!model) {
+      return;
+    }
+    model.upgrade = upgrade;
+    this.publishUpdateEvent();
+    this.lastModified = new Date().getTime();
+  }
+
+  removeCrewModelUpgrade(crewModel): void {
+    if (!this.currentCrew) {
+      return;
+    }
+    const model = this.getCurrentCrewModel(crewModel.id);
+    if (!model) {
+      return;
+    }
+    model.upgrade = null;
+    this.publishUpdateEvent();
+    this.lastModified = new Date().getTime();
+  }
+
+  getCurrentCrewModel(id) {
+    if (!this.currentCrew) {
+      return null;
+    }
+    for (const type in this.currentCrew.models) {
+      if (this.currentCrew.models.hasOwnProperty(type)) {
+        for (const model of this.currentCrew.models[type]) {
+          if (model.id === id) {
+            return model;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   private extractCrewModel(model): CrewModel {
@@ -239,14 +329,14 @@ export class CrewBuilderService {
     return id;
   }
 
-  public buyProblem(model):BuyProblem {
+  public buyProblem(model): BuyProblem {
     const type = this.getModelType(model);
-    let reply:BuyProblem = null;
+    let reply: BuyProblem = null;
     if (!this.currentCrew) {
-      return {hide:false,name:""};
+      return {hide: false, name: ""};
     }
     if (model.stats.cost.value > this.getSoulStonesRemaining()) {
-      return {hide:true,name:"price"};
+      return {hide: true, name: "price"};
     }
     if (this.currentCrew && this.currentCrew.models && this.currentCrew.models[type]) {
       let existingInCrewAlready: number = 0;
@@ -256,30 +346,30 @@ export class CrewBuilderService {
         }
       }
       if (existingInCrewAlready > 0 && (model.allowance || 1) <= existingInCrewAlready) {
-        reply = {hide:false,name:"allowance"};
+        reply = {hide: false, name: "allowance"};
       }
     }
     if (!this.currentCrew.leader) {
       switch (type) {
         case Type.Master:
         case Type.Henchman:
-          return {hide:false,name:""};
+          return {hide: false, name: ""};
         default:
-          return {hide:true,name:"notLeader"};
+          return {hide: true, name: "notLeader"};
       }
     }
     if (model.totemFor && model.totemFor !== this.currentCrew.leader) {
-      return {hide:true,name:"totemForOther"};
+      return {hide: true, name: "totemForOther"};
     }
     for (const keyword of this.currentCrew.keywords) {
       if (model.keywords && model.keywords.indexOf(keyword) > -1) {
-        return reply || {hide:false,name:""};
+        return reply || {hide: false, name: ""};
       }
     }
     if (model.factions.indexOf(this.currentCrew.faction) == -1) {
-      return {hide:true,name:"faction"};
+      return {hide: true, name: "faction"};
     }
-    return reply || {hide:false,name:""};
+    return reply || {hide: false, name: ""};
   }
 
   public calculateSoulStoneUsage() {
@@ -288,6 +378,9 @@ export class CrewBuilderService {
       for (const crewModel of this.currentCrew.models[type]) {
         if (crewModel.name !== this.currentCrew.leader) {
           usage += crewModel.cost;
+        }
+        if (crewModel.upgrade) {
+          usage += crewModel.upgrade.cost;
         }
       }
     }
@@ -355,7 +448,6 @@ export class CrewBuilderService {
         crews.push(this.currentCrew);
       }
       localForage.setItem(this.cacheKey(), crews).then(() => {
-        this.lastModified = new Date().getTime();
         this.ea.publish("crewSave");
       });
     });

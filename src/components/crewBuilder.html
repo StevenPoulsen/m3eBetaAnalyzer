@@ -1,5 +1,6 @@
 <template>
   <require from="../converters/key-value-converter"></require>
+  <require from="./crewModel"></require>
   <div class="crewBuilder">
     <div class="message ${messageShow} ${messageType}" innerhtml.bind="message"></div>
     <div class="inputWrapper">
@@ -8,9 +9,7 @@
     <div class="crewModels">
       <div class="section ${type}" repeat.for="type of crew.models | keys" if.bind="crew.models[type].length">
         <div class="crewModelType">${typeName[type]}</div>
-        <div class="crewModel" repeat.for="model of crew.models[type]">
-          <span>${model.name}</span> <span class="cost">${model.name === crew.leader ? '★':model.cost}</span><span class="remove" hammer-tap.call="removeModel(model.id)"></span>
-        </div>
+        <crew-model repeat.for="model of crew.models[type]" model.bind="model"></crew-model>
       </div>
     </div>
     <div class="listOptions">
