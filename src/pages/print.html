@@ -9,11 +9,13 @@
       <option value="m2e">M2E Format</option>
       <option value="m3e">M3E Format</option>
     </select></label>
+    <label><input type="checkbox" checked.bind="includeModels" /> Include Models</label>
+    <label><input type="checkbox" checked.bind="includeUpgrades" /> Include Upgrades</label>
     <span class="button" hammer-tap.call="print()">Print</span>
     <span class="button" hammer-tap.call="back()">Back</span>
   </div>
-  <div if.bind="edition === 'm2e'" class="m2e">
-    <div class="printModel" repeat.for="model of models">
+  <div if.bind="edition === 'm2e' && includeModels" class="m2e">
+    <div class="printModel ${excludeModels.indexOf(model.name)!=-1?'exclude':''}" repeat.for="model of models">
       <div class="front">
         <div class="picture">
           <img if.bind="images[model.name]" src.bind="images[model.name][0] | blobToUrl" />
@@ -64,10 +66,34 @@
           <action-table if.bind="model.tacticals" actions.bind="model.tacticals" name.bind="'Tactical Actions'" media.bind="'print'"></action-table>
         </div>
       </div>
+      <div class="overlay" if.bind="excludeModels.indexOf(model.name)!==-1">
+        <div>Excluded from print</div>
+        <div class="button" hammer-tap.call="includeModel(model)">Include</div>
+      </div>
+      <div class="button exclude" hammer-tap.call="excludeModel(model)">Exclude</div>
     </div>
   </div>
-  <div if.bind="edition === 'm3e'" class="m3e">
-    <div class="printModel" repeat.for="model of models">
+  <div if.bind="edition === 'm2e' && includeUpgrades" class="m2e">
+    <div class="printUpgrade ${excludeUpgrades.indexOf(upgrade.name)!==-1?'exclude':''}" repeat.for="upgrade of upgrades">
+      <div class="name">${upgrade.name}</div>
+      <div class="cost"><span>Cost: <span class="value">${upgrade.cost}</span> SS</span></div>
+      <div class="text ${text.endsWith(':')?'arrow':''} actionsWrapper" repeat.for="text of upgrade.texts">
+        <span innerhtml.bind="getText(text) | suit"></span>
+        <action-table if.bind="upgrade.actions && isActionText(text)" actions.bind="upgrade.actions" name.bind="upgrade.actions[0].type" media.bind="'print'"></action-table>
+      </div>
+      <div class="limitations">
+        <div>Limitations</div>
+        <span>${getLimitations(upgrade)}</span>
+      </div>
+      <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.name)!==-1">
+        <div>Excluded from print</div>
+        <div class="button" hammer-tap.call="includeUpgrade(upgrade)">Include</div>
+      </div>
+      <div class="button exclude" hammer-tap.call="excludeUpgrade(upgrade)">Exclude</div>
+    </div>
+  </div>
+  <div if.bind="edition === 'm3e' && includeModels" class="m3e">
+    <div class="printModel ${excludeModels.indexOf(model.name)!=-1?'exclude':''}" repeat.for="model of models">
       <div class="front">
         <div class="imageTextColorPicker" hammer-tap.call="togglePictureTextColor(model)">&#9787;/&#9786;</div>
         <div class="picture">
@@ -130,6 +156,33 @@
         </div>
         <div class="base">${model.size.base}<span>MM</span></div>
       </div>
+      <div class="overlay" if.bind="excludeModels.indexOf(model.name)!==-1">
+        <div>Excluded from print</div>
+        <div class="button" hammer-tap.call="includeModel(model)">Include</div>
+      </div>
+      <div class="button exclude" hammer-tap.call="excludeModel(model)">Exclude</div>
+    </div>
+  </div>
+  <div if.bind="edition === 'm3e' && includeUpgrades" class="m3e">
+    <div class="printUpgrade ${excludeUpgrades.indexOf(upgrade.name)!=-1?'exclude':''}" repeat.for="upgrade of upgrades">
+      <div class="leftColumn">
+        <div class="name">${upgrade.name}</div>
+        <div class="cost">${upgrade.cost}</div>
+      </div>
+      <div class="text ${text.endsWith(':')?'arrow':''} actionsWrapper" repeat.for="text of upgrade.texts">
+        <span innerhtml.bind="getText(text) | suit"></span>
+        <action-table if.bind="upgrade.actions && isActionText(text)" actions.bind="upgrade.actions" name.bind="upgrade.actions[0].type" media.bind="'print'"></action-table>
+      </div>
+      <div class="limitations">
+        <div>Limitations</div>
+        <span>${getLimitations(upgrade)}</span>
+      </div>
+      <img class="faction" src="${'/images/'+dataService.getFactionImage(crew.faction)}" alt="" />
+      <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.name)!==-1">
+        <div>Excluded from print</div>
+        <div class="button" hammer-tap.call="includeUpgrade(upgrade)">Include</div>
+      </div>
+      <div class="button exclude" hammer-tap.call="excludeUpgrade(upgrade)">Exclude</div>
     </div>
   </div>
 </template>

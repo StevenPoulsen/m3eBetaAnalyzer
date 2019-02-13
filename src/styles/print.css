@@ -19,7 +19,7 @@
   vertical-align: middle;
 }
 
-.printModel {
+.printModel, .printUpgrade {
   page-break-inside: avoid;
   border: .25mm solid #000;
   position: relative;
@@ -259,7 +259,7 @@
   margin: 0 0 0 7mm;
 }
 
-.printModel .actionsWrapper .actionHead {
+.actionsWrapper .actionHead {
   color: #fff;
   overflow:hidden;
   padding: .5mm 1mm;
@@ -267,7 +267,7 @@
   position:relative;
   line-height: 1em;
 }
-.printModel .actionsWrapper .actionHead:before {
+.actionsWrapper .actionHead:before {
   content:'';
   position: absolute;
   top:0;
@@ -277,34 +277,141 @@
   border-bottom: 5mm solid #333;
   z-index: -1;
 }
-.printModel .actionsWrapper .actionStats {
+.actionsWrapper .actionStats {
   overflow:hidden;
   line-height:1.4em;
 }
-.printModel .actionsWrapper .actionName {
+.actionsWrapper .actionName {
   width: 40%;
   font-weight: bold;
   float:left;
 }
 
-.printModel .actionsWrapper .actionRg,
-.printModel .actionsWrapper .actionStat,
-.printModel .actionsWrapper .actionRst,
-.printModel .actionsWrapper .actionTN {
+.actionsWrapper .actionRg,
+.actionsWrapper .actionStat,
+.actionsWrapper .actionRst,
+.actionsWrapper .actionTN {
   width: 15%;
   text-align: center;
   float:left;
 }
-.printModel .actionsWrapper .actionRules {
+.actionsWrapper .actionRules {
   padding: .5mm 1mm 1mm;
 }
-.printModel .actionsWrapper .actionTrigger {
+.actionsWrapper .actionTrigger {
   margin: .5mm 0 0 2.5mm;
   padding-left: 2.5mm;
   text-indent: -2.5mm;
 }
-.printModel .actionsWrapper .actionTriggerName {
+.actionsWrapper .actionTriggerName {
   font-weight: bold;
   font-style: italic;
 }
 
+.m2e .printUpgrade {
+  height: 89.5mm;
+  width: 64.5mm;
+  overflow:hidden;
+  position:relative;
+  float:left;
+}
+.m2e .printUpgrade > .name {
+  font-variant: small-caps;
+  font-size: 4mm;
+  font-weight: bold;
+  text-align:center;
+  line-height: 1em;
+  padding: 3mm 0 1.5mm;
+}
+.m2e .printUpgrade .cost {
+  font-variant: small-caps;
+  font-size: 2mm;
+  line-height: 6mm;
+  padding: 2mm 0 3mm;
+  position:relative;
+  font-weight: bold;
+  text-align:center;
+}
+.m2e .printUpgrade .cost .value {
+  font-size: 6mm;
+  padding: 0 1mm;
+}
+.m2e .printUpgrade .text {
+  padding: 0 7mm 2mm;
+  position:relative;
+}
+.m2e .printUpgrade .text.arrow:before {
+  left:  5mm;
+  top:0;
+  position:absolute;
+  content:'';
+  border: 1mm transparent solid;
+  border-left-color:#ccc;
+}
+.m2e .printUpgrade .text .name {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+.m2e .printUpgrade .limitations {
+  position: absolute;
+  bottom: 3mm;
+  left:0;
+  right:0;
+  text-align: center;
+}
+.m2e .printUpgrade .limitations div {
+  text-transform: uppercase;
+  font-size:2.2mm;
+  line-height: 3.8mm;
+}
+.m2e .printUpgrade .limitations span {
+  font-weight: bold;
+  margin-top: 1mm;
+  text-transform: capitalize;
+}
+
+.exclude .overlay {
+  content: '';
+  position: absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  background: none rgba(255,255,255,.8);
+  font-size: 16px;
+  text-align: center;
+}
+.exclude .overlay div:first-child{
+  color: darkred;
+  margin-top: 40mm;
+}
+.exclude .overlay .button {
+  margin: 14px 28px;
+}
+.printModel .button.exclude,
+.printUpgrade .button.exclude {
+  opacity: 0;
+  position: absolute;
+  bottom: 30mm;
+  left:14mm;
+  right: 14mm;
+  transition: opacity 300ms;
+  font-size: 16px;
+}
+.printModel .button.exclude {
+  left: 50mm;
+  right: 50mm;
+}
+.printModel:hover .button.exclude,
+.printUpgrade:hover .button.exclude {
+  opacity: 1;
+}
+.printModel.exclude:hover .button.exclude,
+.printUpgrade.exclude:hover .button.exclude {
+  opacity: 0;
+}
+@media print {
+  .exclude {
+    display: none;
+  }
+}

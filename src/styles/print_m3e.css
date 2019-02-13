@@ -7,6 +7,7 @@
   width: 141mm;
   height: 120mm;
   overflow: hidden;
+  position:relative;
 }
 
 .m3e .printModel .front,
@@ -286,4 +287,69 @@
 .m3e .back .base span {
   font-size: 1.8mm;
   vertical-align: bottom;
+}
+
+.m3e .printUpgrade {
+  width: 70mm;
+  height: 120mm;
+  overflow: hidden;
+  position:relative;
+  float:left;
+}
+
+.m3e .printUpgrade .leftColumn {
+  position: absolute;
+  left: 12mm;
+  width: 120mm;
+  transform-origin: bottom left;
+  transform: rotate(-90deg);
+  border-bottom: 1mm solid #999;
+  font-size:5mm;
+  font-variant: small-caps;
+  line-height: 12mm;
+  text-align: right;
+  bottom:0;
+  font-weight: bold;
+}
+.leftColumn div {
+  display: inline-block;
+}
+
+.m3e .printUpgrade .leftColumn .cost {
+  margin: 2mm 0 2mm 2mm;
+  border-left: .5mm solid #999;
+  padding: 0 3mm 0 2mm;
+  line-height: 8mm;
+}
+
+.m3e .printUpgrade .text {
+  margin: 2mm 8mm 0 14mm;
+}
+.m3e .printUpgrade .text .name {
+  font-weight: bold;
+}
+
+.m3e .printUpgrade .limitations {
+  position: absolute;
+  right: 3mm;
+  bottom: 3mm;
+  text-align: right;
+  font-weight: bold;
+}
+.m3e .printUpgrade .limitations div {
+  text-transform: uppercase;
+  padding-bottom: .5mm;
+  border-bottom: 0.25mm solid #666;
+  margin-bottom: .5mm;
+}
+.m3e .printUpgrade .limitations span {
+  text-transform: capitalize;
+}
+.m3e .printUpgrade .faction {
+  position: absolute;
+  left: 4.5mm;
+  bottom: 3mm;
+  width: 12mm;
+  border: 1mm solid #999;
+  border-radius: 100%;
 }

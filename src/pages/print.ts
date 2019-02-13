@@ -9,10 +9,16 @@ import * as localForage from 'localforage';
 @autoinject()
 export class Print {
   private models:any[] = [];
+  private upgrades:any[] = [];
   @observable()
   private edition:string;
+  private crew;
+  private includeModels:boolean = true;
+  private includeUpgrades:boolean = true;
   private images = {};
   private whitePictureText = {};
+  private excludeModels:string[] = [];
+  private excludeUpgrades:string[] = [];
 
   constructor(private crewBuilderService: CrewBuilderService, private dataService: DataService, private trackingService: TrackingService, private suitConverter: SuitValueConverter, private router: AppRouter) {
     this.loadCrew();
@@ -24,8 +30,10 @@ export class Print {
 
   private loadCrew():void {
     const models:any[] = [];
+    const upgrades:any[] = [];
     localForage.getItem("printCrew").then((crew:any) => {
       if (crew && crew.models) {
+        this.crew = crew;
         let amount:number = 0;
         const types = [];
         for (const type of Reflect.ownKeys(crew.models)) {
@@ -37,16 +45,42 @@ export class Print {
         for (const t of types) {
           if (crew.models[t]) {
             for (const crewModel of crew.models[t]) {
+
+              if (crewModel.upgrade) {
+                this.dataService.getUpgrade(crewModel.upgrade.name).then(upgrade => {
+                  upgrades.push(upgrade);
+                  this.upgrades = upgrades;
+                })
+              }
               this.dataService.getModel(crewModel.name).then(model => {
                 models.push(model);
                 this.images[model.name] = null;
                 if (models.length === amount) {
                   this.models = models;
+                  this.addSpecialUpgrades();
                 }
               });
             }
           }
         }
+
+      }
+    });
+  }
+
+  private addSpecialUpgrades() {
+    this.dataService.getFaction(this.crew.faction).then(data => {
+      if (data && data.upgrades) {
+        const upgrades = this.upgrades.slice(0);
+        const exclude:string[] = [];
+        for (const upgrade of data.upgrades) {
+          if (upgrade.limitations.special) {
+            exclude.push(upgrade.name);
+            upgrades.push(upgrade);
+          }
+        }
+        this.upgrades = upgrades;
+        this.excludeUpgrades = exclude;
       }
     });
   }
@@ -57,6 +91,35 @@ export class Print {
 
   togglePictureTextColor(model) {
     this.whitePictureText[model.name] = !this.whitePictureText[model.name];
+  }
+
+  getText(text):string {
+    if(text.endsWith(":")) {
+      return text;
+    }
+    const split = text.split(":");
+    if (split.length > 1) {
+      return '<span class="name">'+this.suitConverter.toView(split[0],'print')+':</span><span>'+this.suitConverter.toView(split[1],'print')+'</span>';
+    }
+    return text;
+  }
+
+  isActionText(text):boolean {
+    return !!text.match(/.*gains the following.* Actions?:/i);
+  }
+
+  getLimitations(upgrade):string {
+    const limitations = [];
+    for (const key of Reflect.ownKeys(upgrade.limitations)) {
+      if (upgrade.limitations[key]) {
+        if (typeof upgrade.limitations[key] === "number"){
+          limitations.push(String(key) + " (" + upgrade.limitations[key] + ")");
+        } else {
+          limitations.push(String(key) + " (" + upgrade.limitations[key].join(", ") + ")");
+        }
+      }
+    }
+    return limitations.join(", ");
   }
 
   private setEdition():void {
@@ -119,5 +182,29 @@ export class Print {
       result.push(word.charAt(0).toUpperCase()+word.slice(1));
     }
     return result.join(" ");
+  }
+
+  includeUpgrade(upgrade) {
+    const excludes = this.excludeUpgrades.slice(0);
+    excludes.splice(excludes.indexOf(upgrade.name),1);
+    this.excludeUpgrades = excludes;
+  }
+
+  excludeUpgrade(upgrade){
+    const excludes = this.excludeUpgrades.slice(0);
+    excludes.push(upgrade.name);
+    this.excludeUpgrades = excludes;
+  }
+
+  includeModel(model) {
+    const excludes = this.excludeModels.slice(0);
+    excludes.splice(excludes.indexOf(model.name),1);
+    this.excludeModels = excludes;
+  }
+
+  excludeModel(model) {
+    const excludes =this.excludeModels.slice(0);
+    excludes.push(model.name);
+    this.excludeModels = excludes;
   }
 }

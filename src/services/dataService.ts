@@ -92,6 +92,23 @@ export class DataService {
     });
   }
 
+  public getUpgrade(name: string): Promise<any> {
+    return this.getData(false).then(data => {
+      if (!name || !data || !data.factions) {
+        return null;
+      }
+      for (const faction in data.factions) {
+        if (data.factions.hasOwnProperty(faction) && data.factions[faction].upgrades) {
+          for (const upgrade of data.factions[faction].upgrades) {
+            if (name === upgrade.name) {
+              return upgrade;
+            }
+          }
+        }
+      }
+    });
+  }
+
   public consumeFactionRules(version, faction, rules): void {
     const data = {name: faction, models: [], timestamp: new Date().getTime()};
     const lines = rules.split("\n");
@@ -286,7 +303,7 @@ export class DataService {
           case "new":
             if (t === "Cost: SS") {
               state = "content";
-              upgrade = {texts: [], abilities: [], minionAbilities: [], name: "", cost: 0, limitations: {}, actions: []};
+              upgrade = {texts: [], name: "", cost: 0, limitations: {}, actions: []};
             }
             break;
           case "name":
@@ -442,6 +459,12 @@ export class DataService {
     console.log("Adding faction upgrades", data, factions);
     this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion};
     this.saveData();
+  }
+
+  public getFaction(faction:string): Promise<any> {
+    return this.getData().then(data => {
+      return data.factions[this.getFactionKey(faction)];
+    })
   }
 
   public getData(anew: boolean = false): Promise<VersionDataEntry> {
