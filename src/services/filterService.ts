@@ -5,7 +5,7 @@ import * as localForage from 'localforage';
 @autoinject()
 export class FilterService {
   sortValues: string[] = ["wyrd","name","cost"]
-  filters:any = {faction: {}, types: {}, keywords:{}, rules:{}};
+  filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}};
   options:any = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
   costMax: number = 16;
   costMin: number = 0;
@@ -19,10 +19,17 @@ export class FilterService {
   @observable()
   freeText: string;
   quickShows:string[] = ["factions","types","keywords","cost","mv","df","wp","sz"];
+  customTypes:string[] = ["owned","painted","favourites","other"];
+  custom:any = {
+    owned:[],
+    painted:[],
+    favourites:[]
+  };
 
   constructor(private crewBuilderService: CrewBuilderService) {
     this.loadFilters();
     this.loadOptions();
+    this.loadCustom();
   }
 
   filterChange():void {
@@ -31,6 +38,26 @@ export class FilterService {
     }
     this.saveFilters();
     this.saveOptions();
+  }
+
+  toggleCustom(type, model) {
+    if (type && model && this.custom[type]) {
+      const customs = this.custom[type].slice(0);
+      const pos = customs.indexOf(model.name);
+      if (pos > -1) {
+        customs.splice(pos,1);
+      } else {
+        customs.push(model.name);
+      }
+      this.custom[type] = customs;
+      if (!this.filters.custom) {
+        this.filters.custom = {};
+      }
+      if (this.filters.custom[type]) {
+        this.filterChange();
+      }
+      this.saveCustom();
+    }
   }
 
   setCrewLegalOnly(bool: boolean) {
@@ -56,41 +83,48 @@ export class FilterService {
             }
           });
         }
+        for (const customType of this.customTypes) {
+          this.filters.custom[customType] = this.filters.custom[customType] !== false;
+        }
         if (this.options && this.options.sort && this.options.sort.reverseSort) {
           data.factions[faction].models.reverse();
         }
         for (let model of data.factions[faction].models) {
-          for (let faction of model.factions) {
-            factions[faction] = true;
-            this.filters.faction[faction] = this.filters.faction[faction] !== false;
-          }
-          if (!FilterService.isFiltered(model.factions, this.filters.faction)) {
-            for (let type of model.charactaristics) {
-              types[type] = true;
-              this.filters.types[type] = this.filters.types[type] !== false;
+          if ((this.filters.custom.owned && this.custom.owned.indexOf(model.name) > -1)
+            || (this.filters.custom.painted && this.custom.painted.indexOf(model.name) > -1)
+            || (this.filters.custom.favourites && this.custom.favourites.indexOf(model.name) > -1)
+            || (this.filters.custom.other && this.custom.owned.indexOf(model.name) + this.custom.painted.indexOf(model.name) + this.custom.favourites.indexOf(model.name) ===-3 )) {
+            for (let faction of model.factions) {
+              factions[faction] = true;
+              this.filters.faction[faction] = this.filters.faction[faction] !== false;
             }
-            if (!FilterService.isFiltered(model.charactaristics, this.filters.types)) {
-              if (model.keywords) {
-                for (let keyword of model.keywords) {
-                  keywords[keyword] = true;
-                  this.filters.keywords[keyword] = this.filters.keywords[keyword] !== false;
-                }
-              } else {
-                keywords['None'] = true;
-                this.filters.keywords['None'] = this.filters.keywords['None'] !== false;
+            if (!FilterService.isFiltered(model.factions, this.filters.faction)) {
+              for (let type of model.charactaristics) {
+                types[type] = true;
+                this.filters.types[type] = this.filters.types[type] !== false;
               }
-              if (!FilterService.isFiltered(model.keywords, this.filters.keywords)
-                || (!model.keywords && this.filters.keywords['None'] !== false)) {
-                for (let rule of model.rules) {
-                  rules[rule.name] = true;
-                  this.filters.rules[rule.name] = this.filters.rules[rule.name] !== false;
+              if (!FilterService.isFiltered(model.charactaristics, this.filters.types)) {
+                if (model.keywords) {
+                  for (let keyword of model.keywords) {
+                    keywords[keyword] = true;
+                    this.filters.keywords[keyword] = this.filters.keywords[keyword] !== false;
+                  }
+                } else {
+                  keywords['None'] = true;
+                  this.filters.keywords['None'] = this.filters.keywords['None'] !== false;
                 }
-                if ((model.stats.cost.value >= this.costMin && model.stats.cost.value <= this.costMax)
-                  && (!FilterService.isFiltered(model.rules, this.filters.rules))
-                  && (!this.freeText || this.containsText(model))) {
-                      if (this.crewBuilderService.isBuilding) {
+                if (!FilterService.isFiltered(model.keywords, this.filters.keywords)
+                  || (!model.keywords && this.filters.keywords['None'] !== false)) {
+                  for (let rule of model.rules) {
+                    rules[rule.name] = true;
+                    this.filters.rules[rule.name] = this.filters.rules[rule.name] !== false;
+                  }
+                  if ((model.stats.cost.value >= this.costMin && model.stats.cost.value <= this.costMax)
+                    && (!FilterService.isFiltered(model.rules, this.filters.rules))
+                    && (!this.freeText || this.containsText(model))) {
+                    if (this.crewBuilderService.isBuilding) {
                       model.tax = this.crewBuilderService.calculateModelTax(model);
-                      const buyProblem:BuyProblem = this.crewBuilderService.buyProblem(model);
+                      const buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
                       if (this.crewBuilderService.isBuilding &&
                         (!this.crewLegalOnly || !buyProblem.hide) &&
                         (!this.taxFreeOnly || model.tax <= 0)) {
@@ -100,6 +134,7 @@ export class FilterService {
                     } else {
                       filteredData.factions[faction].models.push(model);
                     }
+                  }
                 }
               }
             }
@@ -203,8 +238,14 @@ export class FilterService {
   }
 
   private loadFilters() {
-    localForage.getItem("filters").then(value => {
+    localForage.getItem("filters").then((value :any)=> {
       if (value) {
+        if (!value.custom) {
+          value.custom = {};
+          for(const customType of this.customTypes) {
+            value.custom[customType] = true;
+          }
+        }
         this.filters = value;
       }
     });
@@ -224,5 +265,17 @@ export class FilterService {
 
   private saveOptions() {
     localForage.setItem("options", this.options);
+  }
+
+  private saveCustom() {
+    localForage.setItem("custom", this.custom);
+  }
+
+  private loadCustom() {
+    localForage.getItem("custom").then(value => {
+      if (value) {
+        this.custom = value;
+      }
+    });
   }
 }

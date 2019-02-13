@@ -83,4 +83,8 @@ export class Model {
     this.crewBuilderService.addModel(this.model);
     this.filterService.filterChange();
   }
+
+  togglePersonal(type) {
+    this.filterService.toggleCustom(type, this.model);
+  }
 }

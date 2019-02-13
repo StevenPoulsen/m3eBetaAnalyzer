@@ -29,6 +29,11 @@
       <action-table if.bind="model.attacks" actions.bind="model.attacks" name.bind="'Attack Actions'"></action-table>
       <action-table if.bind="model.tacticals" actions.bind="model.tacticals" name.bind="'Tactical Actions'"></action-table>
 
+      <div class="personalize">
+        <div class="button ${filterService.custom.owned.indexOf(model.name)>-1?'active':''}" hammer-tap.call="togglePersonal('owned')">Owned</div>
+        <div class="button ${filterService.custom.painted.indexOf(model.name)>-1?'active':''}" hammer-tap.call="togglePersonal('painted')">Painted</div>
+        <div class="button ${filterService.custom.favourites.indexOf(model.name)>-1?'active':''}" hammer-tap.call="togglePersonal('favourites')">Favourite</div>
+      </div>
     </div>
   </div>
 </template>

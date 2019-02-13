@@ -322,6 +322,17 @@ ux-dialog-head {
   font-weight: bold;
   font-style: italic;
 }
+.model .personalize {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.model .personalize .button {
+  margin: 8px 8px 0;
+}
+.model .personalize .button.active {
+  background: green;
+}
 
 .suitImg {
   display: inline-block;

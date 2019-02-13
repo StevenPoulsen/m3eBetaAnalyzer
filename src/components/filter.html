@@ -40,6 +40,12 @@
         <label><input type="text" class="fullWidth" value.bind="filterService.freeText & debounce" /></label>
       </div>
     </filter-section>
+
+    <filter-section name.bind="'Personal'" filter.bind="'custom'">
+      <div class="inputWrapper" repeat.for="type of filterService.customTypes">
+        <label class="capitalize"><input type="checkbox" name="${type}" checked.bind="filterService.filters.custom[type]" change.delegate="filterService.filterChange()" /> ${type}</label>
+      </div>
+    </filter-section>
     
     <filter-section name.bind="'Crew builder'" if.bind="filterService.crewBuilderService.isBuilding">
       <div class="inputWrapper">
