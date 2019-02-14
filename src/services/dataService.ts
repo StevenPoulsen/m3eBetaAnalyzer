@@ -121,6 +121,7 @@ export class DataService {
           if (emptyLines > 1 && (state === "attacks" || state === "tacticals")) {
             if (model) {
               data.models.push(model);
+              model = null;
             }
             state = "name";
           }
@@ -266,6 +267,9 @@ export class DataService {
         console.error("Unable to parse line ", t, model, e);
         return;
       }
+    }
+    if (model) {
+      data.models.push(model);
     }
     this.addFactionData(version, data);
   }
@@ -436,7 +440,7 @@ export class DataService {
     }
 
     if (factions[data.name]) {
-      this.factions[data.name].models = data.models;
+      factions[data.name].models = data.models;
     } else {
       factions[data.name] = data;
     }
