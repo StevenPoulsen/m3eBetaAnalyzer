@@ -27,7 +27,8 @@ export class DataService {
     'Guild': 'guild',
     'Neverborn': 'neverborn',
     "Resurrectionist": "resser",
-    "Ten Thunders": "tt"
+    "Ten Thunders": "tt",
+    "Dead Man's Hand": "dmh"
   };
   public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19"];
   public currentVersion: string;

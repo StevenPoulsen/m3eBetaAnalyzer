@@ -34,7 +34,7 @@ export class EditModel {
   private setValidUpgrades():void {
     const faction = this.dataService.getFactionKey(this.crewBuilderService.getCrew().faction);
     this.dataService.getData().then(data=>{
-      const validUpgrades:any[] = [], model = this.getModelFromData(data, faction, this.crewModel.name);
+      const validUpgrades:any[] = [], model = this.getModelFromData(data, this.crewModel.name);
       if (model && data && data.factions && data.factions[faction]) {
         const upgrades = data.factions[faction].upgrades;
         if (upgrades) {
@@ -54,11 +54,13 @@ export class EditModel {
     });
   }
 
-  private getModelFromData(data:any, faction:string, modelName:string):any {
+  private getModelFromData(data:any, modelName:string):any {
     if (data) {
-      for (const model of data.factions[faction].models) {
-        if (model.name === modelName) {
-          return model;
+      for (const faction of Reflect.ownKeys(data.factions)) {
+        for (const model of data.factions[faction].models) {
+          if (model.name === modelName) {
+            return model;
+          }
         }
       }
     }

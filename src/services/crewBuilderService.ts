@@ -242,7 +242,7 @@ export class CrewBuilderService {
       }
     }
     this.currentCrew.leaderType = this.getModelType(model);
-    if (model.factions.length > 1) {
+    if (model.factions.length > 1 && model.factions[1] !== "Dead Man's Hand") {
       this.dialogService.open({
         viewModel: FactionPrompt, model: {
           factions: model.factions
@@ -358,8 +358,17 @@ export class CrewBuilderService {
           return {hide: true, name: "notLeader"};
       }
     }
-    if (model.totemFor && model.totemFor !== this.currentCrew.leader) {
-      return {hide: true, name: "totemForOther"};
+    if (model.totemFor) {
+      let masterIsHired = false;
+      for (const crewModel of this.currentCrew.models.master) {
+        if (crewModel.name === model.totemFor) {
+          masterIsHired = true;
+          break;
+        }
+      }
+      if (!masterIsHired) {
+        return {hide: true, name: "totemForOther"};
+      }
     }
     for (const keyword of this.currentCrew.keywords) {
       if (model.keywords && model.keywords.indexOf(keyword) > -1) {

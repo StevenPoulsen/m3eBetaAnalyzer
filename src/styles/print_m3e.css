@@ -34,6 +34,7 @@
   border: solid #000 .2mm;
   border-top-style: none;
   text-align:center;
+  z-index:10;
 }
 
 @media print {
