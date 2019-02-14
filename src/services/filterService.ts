@@ -73,6 +73,7 @@ export class FilterService {
     if (data) {
       for (const faction in data.factions) {
         filteredData.factions[faction] = {models: [], name: faction};
+        let filteredDataFactionModels = filteredData.factions[faction].models;
         if (this.options && this.options.sort && this.options.sort.modelSort !== "wyrd") {
           data.factions[faction].models.sort((a, b) => {
             switch (this.options.sort.modelSort) {
@@ -89,50 +90,69 @@ export class FilterService {
         if (this.options && this.options.sort && this.options.sort.reverseSort) {
           data.factions[faction].models.reverse();
         }
-        for (let model of data.factions[faction].models) {
+
+        const filterTypes = this.filters.types, filterFaction = this.filters.faction, filterKeywords = this.filters.keywords, filterRules = this.filters.rules;
+
+        let factionModels = data.factions[faction].models;
+        for (let factionModelIndex = 0, factionModelLength = factionModels.length, model; factionModelIndex < factionModelLength; factionModelIndex++) {
+          model = factionModels[factionModelIndex];
           if ((this.filters.custom.owned && this.custom.owned.indexOf(model.name) > -1)
             || (this.filters.custom.painted && this.custom.painted.indexOf(model.name) > -1)
             || (this.filters.custom.favourites && this.custom.favourites.indexOf(model.name) > -1)
             || (this.filters.custom.other && this.custom.owned.indexOf(model.name) + this.custom.painted.indexOf(model.name) + this.custom.favourites.indexOf(model.name) ===-3 )) {
-            for (let faction of model.factions) {
-              factions[faction] = true;
-              this.filters.faction[faction] = this.filters.faction[faction] !== false;
+
+            let primaryFaction = model.factions[0];
+            factions[primaryFaction] = true;
+            filterFaction[primaryFaction] = filterFaction[primaryFaction] !== false;
+            let secondaryFaction = null;
+            if (model.factions.length === 2) {
+              secondaryFaction = model.factions[1];
+              factions[secondaryFaction] = true;
+              filterFaction[secondaryFaction] = filterFaction[secondaryFaction] !== false;
             }
-            if (!FilterService.isFiltered(model.factions, this.filters.faction)) {
-              for (let type of model.charactaristics) {
+
+            if (!FilterService.isFiltered(model.factions, filterFaction)) {
+              let modelCharacteristics = model.charactaristics;
+              for (let typeIndex = 0, typeLength = modelCharacteristics.length, type; typeIndex < typeLength; typeIndex++) {
+                type = modelCharacteristics[typeIndex];
                 types[type] = true;
-                this.filters.types[type] = this.filters.types[type] !== false;
+                filterTypes[type] = filterTypes[type] !== false;
               }
-              if (!FilterService.isFiltered(model.charactaristics, this.filters.types)) {
-                if (model.keywords) {
-                  for (let keyword of model.keywords) {
+              if (!FilterService.isFiltered(modelCharacteristics, filterTypes)) {
+                let modelKeywords = model.keywords;
+                if (modelKeywords) {
+                  for (let keywordIndex = 0, keywordLength = modelKeywords.length, keyword; keywordIndex < keywordLength; keywordIndex++) {
+                    keyword = modelKeywords[keywordIndex];
                     keywords[keyword] = true;
-                    this.filters.keywords[keyword] = this.filters.keywords[keyword] !== false;
+                    filterKeywords[keyword] = filterKeywords[keyword] !== false;
                   }
                 } else {
                   keywords['None'] = true;
-                  this.filters.keywords['None'] = this.filters.keywords['None'] !== false;
+                  filterKeywords['None'] = filterKeywords['None'] !== false;
                 }
-                if (!FilterService.isFiltered(model.keywords, this.filters.keywords)
-                  || (!model.keywords && this.filters.keywords['None'] !== false)) {
-                  for (let rule of model.rules) {
+                if (!FilterService.isFiltered(modelKeywords, filterKeywords)
+                  || (!modelKeywords && filterKeywords['None'] !== false)) {
+                  let modelRules = model.rules;
+                  for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++){
+                    rule = modelRules[ruleIndex];
                     rules[rule.name] = true;
-                    this.filters.rules[rule.name] = this.filters.rules[rule.name] !== false;
+                    filterRules[rule.name] = filterRules[rule.name] !== false;
                   }
-                  if ((model.stats.cost.value >= this.costMin && model.stats.cost.value <= this.costMax)
-                    && (!FilterService.isFiltered(model.rules, this.filters.rules))
+                  let modelCost = model.stats.cost.value;
+                  if ((modelCost >= this.costMin && modelCost <= this.costMax)
+                    && (!FilterService.isFiltered(modelRules, filterRules))
                     && (!this.freeText || this.containsText(model))) {
                     if (this.crewBuilderService.isBuilding) {
                       model.tax = this.crewBuilderService.calculateModelTax(model);
-                      const buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
+                      let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
                       if (this.crewBuilderService.isBuilding &&
                         (!this.crewLegalOnly || !buyProblem.hide) &&
                         (!this.taxFreeOnly || model.tax <= 0)) {
                         model.problem = this.crewLegalOnly ? buyProblem.name : '';
-                        filteredData.factions[faction].models.push(model);
+                        filteredDataFactionModels.push(model);
                       }
                     } else {
-                      filteredData.factions[faction].models.push(model);
+                      filteredDataFactionModels.push(model);
                     }
                   }
                 }
@@ -166,22 +186,28 @@ export class FilterService {
     if (model.name.toLowerCase().includes(text)) {
       return true;
     }
-    if (model.rules) {
-      for (const rule of model.rules) {
-        if (rule.name.toLowerCase().includes(text) || (rule.text && rule.text.toLowerCase().includes(text))) {
+    const modelRules = model.rules;
+    if (modelRules) {
+      for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++) {
+        rule = modelRules[ruleIndex];
+        if (rule.text && rule.text.toLowerCase().includes(text)) {
           return true;
         }
       }
     }
-    if (model.attacks) {
-      for (const attack of model.attacks) {
+    const modelAttacks = model.attacks;
+    if (modelAttacks) {
+      for (let attackIndex = 0, attackLength  = modelAttacks.length, attack; attackIndex < attackLength; attackIndex++) {
+        attack = modelAttacks[attackIndex];
         if (this.actionContainsText(attack, text)) {
           return true;
         }
       }
     }
-    if (model.tacticals) {
-      for (const tactical of model.tacticals) {
+    const modelTacticals = model.tacticals;
+    if (modelTacticals) {
+      for (let tacticalIndex = 0, tacticalLength = modelTacticals.length, tactical; tacticalIndex < tacticalLength; tacticalIndex++) {
+        tactical = modelTacticals[tacticalIndex];
         if (this.actionContainsText(tactical, text)) {
           return true;
         }
@@ -197,8 +223,10 @@ export class FilterService {
     if (action.name.toLowerCase().includes(text) || (action.rule && action.rule.toLowerCase().includes(text))) {
       return true;
     }
-    if (action.triggers) {
-      for (const trigger of action.triggers) {
+    const actionTriggers = action.triggers;
+    if (actionTriggers) {
+      for (let triggerIndex = 0, triggerLength = actionTriggers.length, trigger; triggerIndex < triggerLength; triggerIndex++) {
+        trigger = actionTriggers[triggerIndex];
         if (trigger.name.toLowerCase().includes(text) || (trigger.rule && trigger.rule.toLowerCase().includes(text))) {
           return true;
         }
@@ -221,7 +249,8 @@ export class FilterService {
     if (!values) {
       return true;
     }
-    for (const a of values) {
+    for (let i = 0, len = values.length, a; i < len; i++) {
+      a = values[i];
       if (typeof a === "string") {
         if (filter[a] === true) {
           return false;

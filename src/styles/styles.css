@@ -333,6 +333,24 @@ ux-dialog-head {
 .model .personalize .button.active {
   background: green;
 }
+.model .close {
+  position: absolute;
+  bottom: 0;
+  right:0;
+  width: 20px;
+  height: 20px;
+  cursor:pointer;
+}
+.close:before {
+  content:'';
+  display: block;
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  margin-top: -5px;
+  border: solid transparent 5px;
+  border-bottom-color: #000;
+}
 
 .suitImg {
   display: inline-block;

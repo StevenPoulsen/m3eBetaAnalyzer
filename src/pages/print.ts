@@ -69,7 +69,7 @@ export class Print {
   }
 
   private addSpecialUpgrades() {
-    this.dataService.getFaction(this.crew.faction).then(data => {
+    this.dataService.getFactionData(this.crew.faction).then(data => {
       if (data && data.upgrades) {
         const upgrades = this.upgrades.slice(0);
         const exclude:string[] = [];

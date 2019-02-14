@@ -12,14 +12,14 @@ export class DataService {
   private appVersion: string = "0.4";
   private data: VersionDataEntry;
   public factions = {
-    "arcanists": {"displayName": "Arcanists"},
-    "bayou": {"displayName": "Bayou"},
-    "dmh": {"displayName": "Dead mans hand"},
-    "guild": {"displayName": "The Guild"},
-    "neverborn": {"displayName": "Neverborn"},
-    "outcasts": {"displayName": "Outcasts"},
-    "resser": {"displayName": "Resser"},
-    "tt": {"displayName": "Ten Thunders"}
+    "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists"},
+    "bayou": {"id":2,"displayName": "Bayou",key:"bayou"},
+    "dmh": {"id":3,"displayName": "Dead mans hand",key:"dmg"},
+    "guild": {"id":4,"displayName": "The Guild",key:"guild"},
+    "neverborn": {"id":5,"displayName": "Neverborn",key:"neverborn"},
+    "outcasts": {"id":6,"displayName": "Outcasts",key:"outcast"},
+    "resser": {"id":7,"displayName": "Resser",key:"resser"},
+    "tt": {"id":8,"displayName": "Ten Thunders",key:"tt"}
   };
   private factionKeys = {
     'Arcanists': 'arcanists',
@@ -34,8 +34,8 @@ export class DataService {
   public currentVersion: string;
 
   constructor() {
-    this.loadDataFromCache();
     this.currentVersion = this.getLatestVersionCode();
+    this.loadDataFromCache().then(data=>{this.data=data;});
   }
 
   getAppVersion() {
@@ -48,6 +48,10 @@ export class DataService {
 
   getFactionKey(faction:string) {
     return this.factionKeys[faction] || faction.toLowerCase();
+  }
+
+  getFaction(faction:string) {
+    return this.factions[this.getFactionKey(faction)];
   }
 
   public getLatestVersionCode(): string {
@@ -112,7 +116,7 @@ export class DataService {
 
   public consumeFactionRules(version, faction, rules): void {
     const data = {name: faction, models: [], timestamp: new Date().getTime()};
-    const lines = rules.split("\n");
+    const lines = rules.split("\n"), factionInfo = this.getFaction(faction);
     let state = "name", model, actionState = "stats", emptyLines = 0, ongoingSkill: boolean = false;
     for (const line of lines) {
       const t = line.trim();
@@ -121,6 +125,7 @@ export class DataService {
           emptyLines++;
           if (emptyLines > 1 && (state === "attacks" || state === "tacticals")) {
             if (model) {
+              model.id = factionInfo.id += "_" + data.models.length;
               data.models.push(model);
               model = null;
             }
@@ -132,7 +137,7 @@ export class DataService {
         switch (state) {
           case "name":
             console.log("Reading model", t);
-            model = {name: t, rules: [], stats: {}, attacks: [], tacticals: []};
+            model = {id: "", name: t, rules: [], stats: {}, attacks: [], tacticals: []};
             state = "charactaristics";
             break;
           case "charactaristics":
@@ -270,6 +275,7 @@ export class DataService {
       }
     }
     if (model) {
+      model.id = factionInfo.id += "_" + data.models.length;
       data.models.push(model);
     }
     this.addFactionData(version, data);
@@ -277,7 +283,7 @@ export class DataService {
 
   public consumeFactionUpgrades(version: string, faction: string, upgrades: string): void {
     const data = {name: faction, upgrades: [], timestamp: new Date().getTime()};
-    const lines: string[] = upgrades.split("\n");
+    const lines: string[] = upgrades.split("\n"), factionInfo = this.getFaction(faction);
     let state: string = "new", upgrade:any, emptyLines: number = 0, text:string = "", limitations:string = "", action:any, actionState:string;
     for (const line of lines) {
       const t = line.trim();
@@ -314,6 +320,7 @@ export class DataService {
           case "name":
             if (t.toLowerCase() === "limitations") {
               if (upgrade) {
+                upgrade.id = factionInfo.id += "_" + data.upgrades.length;
                 data.upgrades.push(upgrade);
               }
               state = "new";
@@ -383,6 +390,7 @@ export class DataService {
       }
     }
     if (upgrade) {
+      upgrade.id = factionInfo.id += "_" + data.upgrades.length;
       data.upgrades.push(upgrade);
     }
 
@@ -466,7 +474,7 @@ export class DataService {
     this.saveData();
   }
 
-  public getFaction(faction:string): Promise<any> {
+  public getFactionData(faction:string): Promise<any> {
     return this.getData().then(data => {
       return data.factions[this.getFactionKey(faction)];
     })

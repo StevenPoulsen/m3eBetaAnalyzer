@@ -14,7 +14,8 @@ export class Model {
     private filterService: FilterService,
     private suitConverter:SuitValueConverter,
     private shownService: ShownService,
-    private crewBuilderService: CrewBuilderService) {
+    private crewBuilderService: CrewBuilderService,
+    private element: Element) {
   }
 
   bind() {
@@ -76,6 +77,11 @@ export class Model {
 
   toggle() {
     this.shown = !this.shown;
+    if (this.element.getBoundingClientRect) {
+      if (this.element.getBoundingClientRect().top < window.scrollY) {
+        this.element.scrollIntoView();
+      }
+    }
     this.shownService.setShown("model", this.model.name, this.shown);
   }
 

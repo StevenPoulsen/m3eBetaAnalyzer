@@ -34,6 +34,8 @@
         <div class="button ${filterService.custom.painted.indexOf(model.name)>-1?'active':''}" hammer-tap.call="togglePersonal('painted')">Painted</div>
         <div class="button ${filterService.custom.favourites.indexOf(model.name)>-1?'active':''}" hammer-tap.call="togglePersonal('favourites')">Favourite</div>
       </div>
+
+      <div class="close" hammer-tap.call="toggle()"></div>
     </div>
   </div>
 </template>

@@ -84,7 +84,7 @@ export class CrewBuilderService {
   }
 
   getSoulStonesRemaining(): number {
-    return this.currentCrew.soulStones - this.calculateSoulStoneUsage();
+    return this.currentCrew.soulStones - this.currentCrew.soulStoneUsage;
   }
 
   hasLeader(): boolean {
@@ -92,6 +92,7 @@ export class CrewBuilderService {
   }
 
   private publishUpdateEvent() {
+    this.currentCrew.soulStoneUsage = this.calculateSoulStoneUsage();
     this.ea.publish("crewUpdate");
   }
 
@@ -125,7 +126,6 @@ export class CrewBuilderService {
       model.cost = newCost;
       hasChange = true;
     }
-    model.upgrades = model.upgrades || [];
     if (hasChange) {
       this.publishUpdateEvent();
       this.lastModified = new Date().getTime();
@@ -187,7 +187,7 @@ export class CrewBuilderService {
     if (!model) {
       return;
     }
-    model.upgrade = upgrade;
+    model.upgrade = this.extractUpgrade(upgrade);
     this.publishUpdateEvent();
     this.lastModified = new Date().getTime();
   }
@@ -222,7 +222,11 @@ export class CrewBuilderService {
   }
 
   private extractCrewModel(model): CrewModel {
-    return {name: model.name, cost: this.calculateModelCost(model), id: this.getNextId()};
+    return {name: model.name, cost: this.calculateModelCost(model), id: model.id};
+  }
+
+  private extractUpgrade(upgrade) {
+    return {name: upgrade.name, cost: upgrade.cost, id:upgrade.id};
   }
 
   private setLeader(model): void {
@@ -291,42 +295,30 @@ export class CrewBuilderService {
       return -1 * model.stats.cost.value;
     }
     if (model.keywords) {
-      if (this.currentCrew.leaderType === Type.Henchman && model.keywords.indexOf("EFFIGY") >= 0) {
+      if (this.currentCrew.leaderType === Type.Henchman && model.keywords.includes("EFFIGY")) {
         return -1 * model.stats.cost.value;
       }
 
       for (const keyword of this.currentCrew.keywords) {
-        if (model.keywords.indexOf(keyword) > -1) {
+        if (model.keywords.includes(keyword)) {
           return 0;
         }
       }
     }
-    if (model.factions && model.factions.indexOf(this.currentCrew.faction) > -1) {
-      if (model.charactaristics && model.charactaristics.indexOf("Versatile") > -1) {
+    if (model.factions && model.factions.includes(this.currentCrew.faction)) {
+      if (model.charactaristics && model.charactaristics.includes("Versatile")) {
         return 0;
       }
-      if (this.currentCrew.extraVersatile.indexOf(model.name) > -1) {
+      if (this.currentCrew.extraVersatile.includes(model.name)) {
         return 0;
       }
       for (const ver of this.currentCrew.extraVersatile) {
-        if (model.charactaristics && model.charactaristics.indexOf(ver) >= 0) {
+        if (model.charactaristics && model.charactaristics.includes(ver)) {
           return 0;
         }
       }
     }
     return 1;
-  }
-
-  private getNextId(): number {
-    let id = 1;
-    for (const type of Reflect.ownKeys(this.currentCrew.models)) {
-      for (const model of this.currentCrew.models[type]) {
-        if (model.id >= id) {
-          id = model.id + 1;
-        }
-      }
-    }
-    return id;
   }
 
   public buyProblem(model): BuyProblem {
@@ -371,11 +363,11 @@ export class CrewBuilderService {
       }
     }
     for (const keyword of this.currentCrew.keywords) {
-      if (model.keywords && model.keywords.indexOf(keyword) > -1) {
+      if (model.keywords && model.keywords.includes(keyword)) {
         return reply || {hide: false, name: ""};
       }
     }
-    if (model.factions.indexOf(this.currentCrew.faction) == -1) {
+    if (!model.factions.includes(this.currentCrew.faction)) {
       return {hide: true, name: "faction"};
     }
     return reply || {hide: false, name: ""};
