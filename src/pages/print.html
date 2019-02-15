@@ -48,6 +48,7 @@
           <div class="wounds">
             <div class="wound" repeat.for="i of +model.stats.health.value"></div>
           </div>
+          <div class="beta">Beta v. ${dataService.currentVersion}</div>
         </div>
         <div class="abilities">
           <div class="abilitiesHeadline"><span>Abilities</span></div>
@@ -85,6 +86,7 @@
         <div>Limitations</div>
         <span>${getLimitations(upgrade)}</span>
       </div>
+      <div class="beta">Beta v. ${dataService.currentVersion}</div>
       <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.name)!==-1">
         <div>Excluded from print</div>
         <div class="button" hammer-tap.call="includeUpgrade(upgrade)">Include</div>
@@ -147,6 +149,7 @@
             Health
           </div>
         </div>
+        <div class="beta">Beta v. ${dataService.currentVersion}</div>
       </div>
       <div class="back">
         <div class="name">${model.name}</div>
@@ -177,6 +180,7 @@
         <div>Limitations</div>
         <span>${getLimitations(upgrade)}</span>
       </div>
+      <div class="beta">Beta v. ${dataService.currentVersion}</div>
       <img class="faction" src="${'/images/'+dataService.getFactionImage(crew.faction)}" alt="" />
       <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.name)!==-1">
         <div>Excluded from print</div>

@@ -40,9 +40,13 @@ export class EditModel {
         if (upgrades) {
           const upgradeUsage = this.crewBuilderService.getCrewUpgradesCount();
           for (const upgrade of upgrades) {
+            if (this.crewModel.upgrade && this.crewModel.upgrade.name === upgrade.name) {
+              validUpgrades.push(upgrade);
+              continue;
+            }
             if (upgrade && !upgrade.limitations.special) {
               if (!upgrade.limitations.restricted || this.arrayContainsAnyFromArray(model.charactaristics, upgrade.limitations.restricted) || this.arrayContainsAnyFromArray(model.keywords, upgrade.limitations.restricted)) {
-                if (!upgrade.limitations.plentiful === null || !upgradeUsage[upgrade.name] || upgradeUsage[upgrade.name] < upgrade.limitations.plentiful) {
+                if (upgrade.limitations.plentiful === null || !upgradeUsage[upgrade.name] || upgradeUsage[upgrade.name] < upgrade.limitations.plentiful) {
                   validUpgrades.push(upgrade);
                 }
               }

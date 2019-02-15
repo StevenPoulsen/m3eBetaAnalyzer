@@ -9,7 +9,7 @@ interface VersionDataEntry {
 }
 
 export class DataService {
-  private appVersion: string = "0.4";
+  private appVersion: string = "0.5";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists"},
@@ -30,7 +30,7 @@ export class DataService {
     "Ten Thunders": "tt",
     "Dead Man's Hand": "dmh"
   };
-  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19"];
+  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19", "2.14.19"];
   public currentVersion: string;
 
   constructor() {
@@ -125,7 +125,7 @@ export class DataService {
           emptyLines++;
           if (emptyLines > 1 && (state === "attacks" || state === "tacticals")) {
             if (model) {
-              model.id = factionInfo.id += "_" + data.models.length;
+              model.id = factionInfo.id + "_" + data.models.length;
               data.models.push(model);
               model = null;
             }
@@ -275,7 +275,7 @@ export class DataService {
       }
     }
     if (model) {
-      model.id = factionInfo.id += "_" + data.models.length;
+      model.id = factionInfo.id + "_" + data.models.length;
       data.models.push(model);
     }
     this.addFactionData(version, data);
@@ -285,6 +285,7 @@ export class DataService {
     const data = {name: faction, upgrades: [], timestamp: new Date().getTime()};
     const lines: string[] = upgrades.split("\n"), factionInfo = this.getFaction(faction);
     let state: string = "new", upgrade:any, emptyLines: number = 0, text:string = "", limitations:string = "", action:any, actionState:string;
+    console.log("Reading faction upgrades", lines.length, "lines for", faction, "in version", version);
     for (const line of lines) {
       const t = line.trim();
       try {
@@ -312,7 +313,7 @@ export class DataService {
         emptyLines = 0;
         switch (state) {
           case "new":
-            if (t === "Cost: SS") {
+            if (t.match(/^Cost: SS.*/)) {
               state = "content";
               upgrade = {texts: [], name: "", cost: 0, limitations: {}, actions: []};
             }
@@ -320,7 +321,7 @@ export class DataService {
           case "name":
             if (t.toLowerCase() === "limitations") {
               if (upgrade) {
-                upgrade.id = factionInfo.id += "_" + data.upgrades.length;
+                upgrade.id = factionInfo.id + "_" + data.upgrades.length;
                 data.upgrades.push(upgrade);
               }
               state = "new";
@@ -390,7 +391,7 @@ export class DataService {
       }
     }
     if (upgrade) {
-      upgrade.id = factionInfo.id += "_" + data.upgrades.length;
+      upgrade.id = factionInfo.id + "_" + data.upgrades.length;
       data.upgrades.push(upgrade);
     }
 
@@ -419,6 +420,10 @@ export class DataService {
   }
 
   private splitActionStats(line): any {
+    const missingMatch = line.match(/^[a-z0-9 ]+ .?[0-9-].? - -$/i);
+    if (missingMatch) {
+      line += " -";
+    }
     const match = line.match(/^(.+) (([a-z]?[0-9][0-9]?")|(x)|(-)) (([0-9][0-9]?[a-z\-+]*)|(x)|(-)) ([^ ]*) (([0-9][0-9]?[a-z]?)|(-)|(x))?$/i);
     if (match && match.length === 15) {
       if (match[1].match(/[Ff][A-Z"].*/)) {

@@ -67,12 +67,14 @@ export class CrewBuilderService {
     if (!this.currentCrew) {
       return count;
     }
-    for (const model of this.currentCrew.models) {
-      if (model.upgrade) {
-        if (!count[model.upgrade.name]) {
-          count[model.upgrade.name] = 1;
-        } else {
-          count[model.upgrade.name]++;
+    for (const type of Reflect.ownKeys(this.currentCrew.models)) {
+      for (const model of this.currentCrew.models[type]) {
+        if (model.upgrade) {
+          if (!count[model.upgrade.name]) {
+            count[model.upgrade.name] = 1;
+          } else {
+            count[model.upgrade.name]++;
+          }
         }
       }
     }
@@ -381,7 +383,7 @@ export class CrewBuilderService {
           usage += crewModel.cost;
         }
         if (crewModel.upgrade) {
-          usage += crewModel.upgrade.cost;
+          usage += +crewModel.upgrade.cost;
         }
       }
     }

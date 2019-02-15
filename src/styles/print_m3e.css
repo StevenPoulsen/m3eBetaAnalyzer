@@ -21,6 +21,13 @@
 .m3e .printModel .front {
   border-right: .2mm dashed #000;
 }
+.m3e .printModel .front .beta {
+  position: absolute;
+  bottom: .5mm;
+  left:0;
+  right: 0;
+  text-align:center;
+}
 
 .m3e .front .imageTextColorPicker {
   position: absolute;
@@ -353,4 +360,11 @@
   width: 12mm;
   border: 1mm solid #999;
   border-radius: 100%;
+}
+.m3e .printUpgrade .beta {
+  position:absolute;
+  bottom:.5mm;
+  right:0;
+  left:0;
+  text-align:center;
 }
