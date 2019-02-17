@@ -34,8 +34,14 @@ export class DataService {
   public currentVersion: string;
 
   constructor() {
-    this.currentVersion = this.getLatestVersionCode();
-    this.loadDataFromCache().then(data=>{this.data=data;});
+    this.setVersion(this.getLatestVersionCode()).then(data=>{this.data=data;});
+  }
+
+  public setVersion(version:string):Promise<VersionDataEntry> {
+    if (version && this.versionCodes.includes(version)) {
+      this.currentVersion = version;
+    }
+    return this.loadDataFromCache();
   }
 
   getAppVersion() {
@@ -97,6 +103,24 @@ export class DataService {
     });
   }
 
+  public getModelById(id: string): Promise<any> {
+    return this.getData(false).then((data) => {
+      if (!id || !data) {
+        return null;
+      }
+      for (const faction in data.factions) {
+        if (data.factions.hasOwnProperty(faction)) {
+          for (const model of data.factions[faction].models) {
+            if (id === model.id) {
+              return model;
+            }
+          }
+        }
+      }
+      return null;
+    });
+  }
+
   public getUpgrade(name: string): Promise<any> {
     return this.getData(false).then(data => {
       if (!name || !data || !data.factions) {
@@ -106,6 +130,23 @@ export class DataService {
         if (data.factions.hasOwnProperty(faction) && data.factions[faction].upgrades) {
           for (const upgrade of data.factions[faction].upgrades) {
             if (name === upgrade.name) {
+              return upgrade;
+            }
+          }
+        }
+      }
+    });
+  }
+
+  public getUpgradeById(id: string): Promise<any> {
+    return this.getData(false).then(data => {
+      if (!id || !data || !data.factions) {
+        return null;
+      }
+      for (const faction in data.factions) {
+        if (data.factions.hasOwnProperty(faction) && data.factions[faction].upgrades) {
+          for (const upgrade of data.factions[faction].upgrades) {
+            if (id === upgrade.id) {
               return upgrade;
             }
           }

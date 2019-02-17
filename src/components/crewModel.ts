@@ -7,8 +7,13 @@ import {EditModel} from "../dialogs/editModel";
 export class CrewModel {
   @bindable()
   private model;
+  private crew;
 
   constructor(private crewBuilderService:CrewBuilderService, private dialogService:DialogService) {}
+
+  bind() {
+    this.crew = this.crewBuilderService.getCrew();
+  }
 
   removeModel() {
     this.crewBuilderService.removeModel(this.model.id);

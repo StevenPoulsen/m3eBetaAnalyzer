@@ -35,6 +35,7 @@ export class CrewBuilderService {
     localForage.getItem("printCrew").then(value => {
       if (value) {
         this.currentCrew = value;
+        localForage.removeItem("printCrew");
       }
     });
   }
@@ -114,6 +115,7 @@ export class CrewBuilderService {
       }
     }
     this.currentCrew.models[type].push(this.extractCrewModel(model));
+    console.log("Model added", model,this.currentCrew.models.master.length);
     this.publishUpdateEvent();
     this.lastModified = new Date().getTime();
   }
@@ -248,21 +250,23 @@ export class CrewBuilderService {
       }
     }
     this.currentCrew.leaderType = this.getModelType(model);
-    if (model.factions.length > 1 && model.factions[1] !== "Dead Man's Hand") {
-      this.dialogService.open({
-        viewModel: FactionPrompt, model: {
-          factions: model.factions
-        }
-      }).whenClosed(response => {
-        if (response.wasCancelled) {
-          this.hideCrewList();
-        } else {
-          this.currentCrew.faction = response.output;
-          this.publishUpdateEvent();
-        }
-      })
-    } else {
-      this.currentCrew.faction = model.factions[0];
+    if (!this.currentCrew.faction) {
+      if (model.factions.length > 1 && model.factions[1] !== "Dead Man's Hand") {
+        this.dialogService.open({
+          viewModel: FactionPrompt, model: {
+            factions: model.factions
+          }
+        }).whenClosed(response => {
+          if (response.wasCancelled) {
+            this.hideCrewList();
+          } else {
+            this.currentCrew.faction = response.output;
+            this.publishUpdateEvent();
+          }
+        })
+      } else {
+        this.currentCrew.faction = model.factions[0];
+      }
     }
 
   }
@@ -406,7 +410,7 @@ export class CrewBuilderService {
       },
       saveName: "",
       lastSave: null,
-      versionCode: "",
+      versionCode: this.dataService.currentVersion,
       soulStones: 50
     };
     this.showCrewList(new Date().getTime());
@@ -493,12 +497,68 @@ export class CrewBuilderService {
 
   public hideCrewList(): void {
     this.lastModified = null;
-    this.currentCrew.faction = null;
-    this.currentCrew.leader = null;
-    this.currentCrew.keywords = [];
-    this.menuService.hideRightMenu();
-    this.publishUpdateEvent();
-    this.menuService.deactivateRightMenu();
+    if (this.currentCrew) {
+      this.currentCrew.faction = null;
+      this.currentCrew.leader = null;
+      this.currentCrew.keywords = [];
+      this.menuService.hideRightMenu();
+      this.publishUpdateEvent();
+      this.menuService.deactivateRightMenu();
+    }
   }
 
+  public getShareLink():string {
+    const crew = this.getCrew();
+    let link = "https://m3e.hong-crewet.dk/#/share/?";
+    const params:any = {
+      v: crew.versionCode,
+      ss: crew.soulStones,
+      f: crew.faction
+    };
+    const models = [];
+    for (const type of Reflect.ownKeys(crew.models)) {
+      for (const crewModel of crew.models[type]) {
+        let model = crewModel.id+"|"+crewModel.cost;
+        if (crewModel.upgrade){
+          model+="|"+crewModel.upgrade.id;
+        }
+        models.push(model);
+      }
+    }
+    params.m = models.join("-");
+    for (const key of Reflect.ownKeys(params)) {
+      link += String(key) + "=" + params[key] + "&";
+    }
+    return link;
+  }
+
+  public setCrewFromShare(shareCrew):Promise<any> {
+    const self = this;
+    return self.dataService.setVersion(shareCrew.v).then(data => {
+      self.newCrew();
+      self.currentCrew.faction = shareCrew.f;
+      self.currentCrew.versionCode = shareCrew.v;
+      self.currentCrew.soulStones = +shareCrew.ss;
+      const promises = [];
+      for (const shareModel of shareCrew.m.split("-")) {
+        const split = shareModel.split("|");
+        if (split.length > 1) {
+          promises.push(self.dataService.getModelById(split[0]).then(model => {
+            self.addModel(model);
+
+            self.editModel(model, +split[1]);
+
+            if (split[2]) {
+              promises.push(self.dataService.getUpgradeById(split[2]).then(upgrade => {
+                if (upgrade) {
+                  self.addCrewModelUpgrade(model, upgrade);
+                }
+              }));
+            }
+          }));
+        }
+      }
+      return Promise.all(promises);
+    });
+  }
 }

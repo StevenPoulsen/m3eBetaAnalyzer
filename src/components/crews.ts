@@ -16,6 +16,11 @@ export class Crews {
         this.crews = crews;
       });
     });
+    ea.subscribe("versionChange", () => {
+      this.crewBuilderService.getCrews().then(crews => {
+        this.crews = crews;
+      });
+    })
     this.crewBuilderService.getCrews().then(crews => {
       this.crews = crews;
     });

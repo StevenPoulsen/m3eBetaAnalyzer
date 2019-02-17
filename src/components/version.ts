@@ -5,13 +5,14 @@ import {CrewBuilderService} from "../services/crewBuilderService";
 import {TrackingService} from "../services/trackingService";
 import {DialogService} from "aurelia-dialog";
 import {Confirm} from "../dialogs/confirm";
+import {EventAggregator} from 'aurelia-event-aggregator';
 
 @autoinject()
 export class Version {
   private currentVersion;
   private nextVersion;
 
-  constructor(private filterService:FilterService, private dataService: DataService, private crewBuilder: CrewBuilderService, private dialogService: DialogService){
+  constructor(private filterService:FilterService, private dataService: DataService, private crewBuilder: CrewBuilderService, private dialogService: DialogService, private ea: EventAggregator){
     this.nextVersion = dataService.currentVersion;
     this.currentVersion = this.nextVersion;
   }
@@ -42,5 +43,6 @@ export class Version {
     this.dataService.currentVersion = this.nextVersion;
     this.filterService.filterChange();
     this.crewBuilder.hideCrewList();
+    this.ea.publish("versionChange");
   }
 }

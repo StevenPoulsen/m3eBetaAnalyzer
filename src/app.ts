@@ -29,6 +29,7 @@ export class App {
     config.map([
       { route: '', name: 'summary', moduleId: PLATFORM.moduleName('pages/summary'), nav: true,  title: "Malifaux3E Beta Analyzer - Summary"},
       { route: 'data', name: 'data', moduleId: PLATFORM.moduleName('pages/data'), nav: true,  title: "Malifaux3E Beta Analyzer - Data"},
+      { route: 'share', name: 'share', moduleId: PLATFORM.moduleName('pages/share'), nav: true,  title: "Malifaux3E Beta Analyzer - Share"},
       { route: 'print', name: 'print', moduleId: PLATFORM.moduleName('pages/print'), nav: true,  title: "Malifaux3E Beta Analyzer - Print"}
     ]);
   }

@@ -210,7 +210,6 @@ export class FilterService {
         });
       }
     }
-    console.log(this.filters);
     return filteredData;
   }
 

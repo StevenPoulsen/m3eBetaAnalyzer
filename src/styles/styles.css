@@ -487,6 +487,21 @@ ux-dialog-head {
   padding: 8px 0 4px;
 }
 
+.shareBody {
+  width: 500px;
+}
+
+.shareBody .headline {
+  margin: 0 0 4px 0;
+}
+.shareBody input {
+  margin: 0 0 8px;
+  width: 100%;
+}
+.shareBody textarea {
+  width: 100%;
+}
+
 @media only screen and (max-width: 800px) {
   .mobileMenuToggler {
     display: block;

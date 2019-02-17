@@ -1,0 +1,26 @@
+<template>
+  <ux-dialog>
+    <ux-dialog-head>
+      Share Crew
+    </ux-dialog-head>
+    <ux-dialog-body>
+      <div class="shareBody">
+        <label for="shareLink" class="headline">
+          Link
+        </label>
+        <div>
+          <input id="shareLink" type="text" value.bind="shareLink" readonly="readonly" hammer-tap.call="copyShareLink()" />
+        </div>
+        <label for="shareText" class="headline">
+          Text
+        </label>
+        <div>
+          <textarea id="shareText" value.bind="shareText" style.bind="shareTextHeight" hammer-tap.call="copyShareText()"></textarea>
+        </div>
+        <div>
+          <div class="button" hammer-tap.call="close()">Close</div>
+        </div>
+      </div>
+    </ux-dialog-body>
+  </ux-dialog>
+</template>

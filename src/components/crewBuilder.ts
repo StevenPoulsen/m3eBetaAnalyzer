@@ -7,6 +7,7 @@ import {DialogService} from "aurelia-dialog";
 import {Confirm} from "../dialogs/confirm";
 import {AppRouter} from "aurelia-router";
 import * as localForage from 'localforage';
+import {ShareCrew} from "../dialogs/shareCrew";
 
 @autoinject()
 export class CrewBuilder {
@@ -109,5 +110,12 @@ export class CrewBuilder {
   printCrew() {
     localForage.setItem("printCrew", this.crewBuilderService.getCrew());
     this.router.navigate("print");
+  }
+
+  shareCrew() {
+    this.dialogService.open({viewModel:ShareCrew, model: {
+        crew: this.crewBuilderService.getCrew(),
+        typeName: this.typeName
+      }, lock: false});
   }
 }
