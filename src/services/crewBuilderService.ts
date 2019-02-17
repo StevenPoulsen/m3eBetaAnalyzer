@@ -507,6 +507,12 @@ export class CrewBuilderService {
     }
   }
 
+  public supportsSharing(){
+    return this.dataService.getData().then(data => {
+      return data && data.factions && data.factions["arcanists"] && data.factions["arcanists"].models.length && data.factions["arcanists"].models[0].id;
+    })
+  }
+
   public getShareLink():string {
     const crew = this.getCrew();
     let link = "https://m3e.hong-crewet.dk/#/share/?";

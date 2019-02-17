@@ -9,13 +9,21 @@ export class ShareCrew {
   private shareText;
   private typeNames;
   private shareTextHeight;
+  private sharingSupported = 0;
 
   constructor(private controller: DialogController, private crewBuilderService: CrewBuilderService) {}
 
   activate(data) {
-    this.typeNames = data.typeName;
-    this.createShareLink();
-    this.createShareText();
+    this.crewBuilderService.supportsSharing().then(bool => {
+      if (bool) {
+        this.typeNames = data.typeName;
+        this.createShareLink();
+        this.createShareText();
+        this.sharingSupported = 1;
+      } else {
+        this.sharingSupported = -1;
+      }
+    });
   }
 
   private createShareLink() {

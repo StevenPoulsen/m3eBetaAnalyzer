@@ -4,7 +4,7 @@
       Share Crew
     </ux-dialog-head>
     <ux-dialog-body>
-      <div class="shareBody">
+      <div class="shareBody" if.bind="sharingSupported === 1">
         <label for="shareLink" class="headline">
           Link
         </label>
@@ -20,6 +20,10 @@
         <div>
           <div class="button" hammer-tap.call="close()">Close</div>
         </div>
+      </div>
+      <div if.bind="sharingSupported=== -1">
+        <div>Sharing is not supported in this beta version. Please use a never version.</div>
+        <div class="button" hammer-tap.call="close()">Close</div>
       </div>
     </ux-dialog-body>
   </ux-dialog>
