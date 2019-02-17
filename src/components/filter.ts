@@ -7,6 +7,4 @@ export class Filter {
 
   constructor(private filterService: FilterService, private dataService: DataService) {
   }
-
-
 }

@@ -28,6 +28,18 @@
       </div>
     </filter-section>
 
+    <filter-section name.bind="'Attacks'" count.bind="filterService.attacks.length" filter.bind="'attacks'">
+      <div class="inputWrapper" repeat.for="attack of filterService.attacks">
+        <label class="capitalize"><input type="checkbox" name="${attack}" checked.bind="filterService.filters.attacks[attack]" change.delegate="filterService.filterChange()" /> ${attack}</label>
+      </div>
+    </filter-section>
+
+    <filter-section name.bind="'Tacticals'" count.bind="filterService.tacticals.length" filter.bind="'tacticals'">
+      <div class="inputWrapper" repeat.for="tactical of filterService.tacticals">
+        <label class="capitalize"><input type="checkbox" name="${tactical}" checked.bind="filterService.filters.tacticals[tactical]" change.delegate="filterService.filterChange()" /> ${tactical}</label>
+      </div>
+    </filter-section>
+
     <filter-section name.bind="'Cost'">
       <div class="inputWrapper">
         <label>Min.: <input type="number" value.bind="filterService.costMin" input.delegate="filterService.filterChange()" /></label>

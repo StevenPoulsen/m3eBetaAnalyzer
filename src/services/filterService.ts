@@ -5,7 +5,7 @@ import * as localForage from 'localforage';
 @autoinject()
 export class FilterService {
   sortValues: string[] = ["wyrd","name","cost"]
-  filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}};
+  filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}};
   options:any = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
   costMax: number = 16;
   costMin: number = 0;
@@ -13,6 +13,8 @@ export class FilterService {
   types: any = [];
   keywords: any = [];
   rules: any = [];
+  attacks: any = [];
+  tacticals: any = [];
   filterChangeFunction: any = null;
   crewLegalOnly: boolean = false;
   taxFreeOnly: boolean = false;
@@ -69,7 +71,7 @@ export class FilterService {
   }
 
   filter(data): any {
-    const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {};
+    const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {}, attacks = {}, tacticals = {};
     if (data) {
       for (const faction in data.factions) {
         filteredData.factions[faction] = {models: [], name: faction};
@@ -91,7 +93,12 @@ export class FilterService {
           data.factions[faction].models.reverse();
         }
 
-        const filterTypes = this.filters.types, filterFaction = this.filters.faction, filterKeywords = this.filters.keywords, filterRules = this.filters.rules;
+        const filterTypes = (this.filters.types = this.filters.types || {}),
+          filterFaction = (this.filters.faction = this.filters.faction || {}),
+          filterKeywords = (this.filters.keywords = this.filters.keywords || {}),
+          filterRules = (this.filters.rules = this.filters.rules || {}),
+          filterAttacks = (this.filters.attacks = this.filters.attacks || {}),
+          filterTacticals = (this.filters.tacticals = this.filters.tacticals || {});
 
         let factionModels = data.factions[faction].models;
         for (let factionModelIndex = 0, factionModelLength = factionModels.length, model; factionModelIndex < factionModelLength; factionModelIndex++) {
@@ -138,21 +145,38 @@ export class FilterService {
                     rules[rule.name] = true;
                     filterRules[rule.name] = filterRules[rule.name] !== false;
                   }
-                  let modelCost = model.stats.cost.value;
-                  if ((modelCost >= this.costMin && modelCost <= this.costMax)
-                    && (!FilterService.isFiltered(modelRules, filterRules))
-                    && (!this.freeText || this.containsText(model))) {
-                    if (this.crewBuilderService.isBuilding) {
-                      model.tax = this.crewBuilderService.calculateModelTax(model);
-                      let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
-                      if (this.crewBuilderService.isBuilding &&
-                        (!this.crewLegalOnly || !buyProblem.hide) &&
-                        (!this.taxFreeOnly || model.tax <= 0)) {
-                        model.problem = this.crewLegalOnly ? buyProblem.name : '';
-                        filteredDataFactionModels.push(model);
+                  if (!FilterService.isFiltered(modelRules, filterRules)) {
+                    let modelAttacks = model.attacks;
+                    for (let attackIndex = 0, attackLength = modelAttacks.length, attack; attackIndex < attackLength; attackIndex++) {
+                      attack = modelAttacks[attackIndex];
+                      attacks[attack.name] = true;
+                      filterAttacks[attack.name] = filterAttacks[attack.name] !== false;
+                    }
+                    if (!FilterService.isFiltered(modelAttacks, filterAttacks)) {
+                      let modelTacticals = model.tacticals;
+                      for (let tacticalIndex = 0, tacticalLength = modelTacticals.length, tactical; tacticalIndex < tacticalLength; tacticalIndex++) {
+                        tactical = modelTacticals[tacticalIndex];
+                        tacticals[tactical.name] = true;
+                        filterTacticals[tactical.name] = filterTacticals[tactical.name] !== false;
                       }
-                    } else {
-                      filteredDataFactionModels.push(model);
+                      if (!FilterService.isFiltered(modelTacticals, filterTacticals)) {
+                        let modelCost = model.stats.cost.value;
+                        if ((modelCost >= this.costMin && modelCost <= this.costMax)
+                          && (!this.freeText || this.containsText(model))) {
+                          if (this.crewBuilderService.isBuilding) {
+                            model.tax = this.crewBuilderService.calculateModelTax(model);
+                            let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
+                            if (this.crewBuilderService.isBuilding &&
+                              (!this.crewLegalOnly || !buyProblem.hide) &&
+                              (!this.taxFreeOnly || model.tax <= 0)) {
+                              model.problem = this.crewLegalOnly ? buyProblem.name : '';
+                              filteredDataFactionModels.push(model);
+                            }
+                          } else {
+                            filteredDataFactionModels.push(model);
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -176,8 +200,17 @@ export class FilterService {
         this.rules.sort((a, b) => {
           return FilterService.stringCompare(a, b)
         });
+        this.attacks = Object.keys(attacks);
+        this.attacks.sort((a, b) => {
+          return FilterService.stringCompare(a, b);
+        });
+        this.tacticals = Object.keys(tacticals);
+        this.tacticals.sort((a, b) => {
+          return FilterService.stringCompare(a, b);
+        });
       }
     }
+    console.log(this.filters);
     return filteredData;
   }
 
@@ -275,7 +308,7 @@ export class FilterService {
             value.custom[customType] = true;
           }
         }
-        this.filters = value;
+        this.filters = Object.assign(this.filters, value);
       }
     });
   }
@@ -287,7 +320,7 @@ export class FilterService {
   private loadOptions() {
     localForage.getItem("options").then(value => {
       if (value) {
-        this.options = value;
+        this.options = Object.assign(this.options, value);
       }
     });
   }
@@ -303,7 +336,7 @@ export class FilterService {
   private loadCustom() {
     localForage.getItem("custom").then(value => {
       if (value) {
-        this.custom = value;
+        this.custom = Object.assign(this.custom, value);
       }
     });
   }
