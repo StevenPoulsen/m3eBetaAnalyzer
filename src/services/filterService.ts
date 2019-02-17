@@ -164,19 +164,31 @@ export class FilterService {
                   }
                   if (!FilterService.isFiltered(modelRules, filterRules)) {
                     let modelAttacks = model.attacks;
-                    for (let attackIndex = 0, attackLength = modelAttacks.length, attack; attackIndex < attackLength; attackIndex++) {
-                      attack = modelAttacks[attackIndex];
-                      attacks[attack.name] = true;
-                      filterAttacks[attack.name] = filterAttacks[attack.name] !== false;
+                    if (modelAttacks && modelAttacks.length) {
+                      for (let attackIndex = 0, attackLength = modelAttacks.length, attack; attackIndex < attackLength; attackIndex++) {
+                        attack = modelAttacks[attackIndex];
+                        attacks[attack.name] = true;
+                        filterAttacks[attack.name] = filterAttacks[attack.name] !== false;
+                      }
+                    } else {
+                      attacks['None'] = true;
+                      filterAttacks['None'] = filterAttacks['None'] !== false;
                     }
-                    if (modelAttacks.length === 0 || !FilterService.isFiltered(modelAttacks, filterAttacks)) {
-                      let modelTacticals = model.tacticals;
+                    let modelTacticals = model.tacticals;
+                    if (modelTacticals && modelTacticals.length) {
                       for (let tacticalIndex = 0, tacticalLength = modelTacticals.length, tactical; tacticalIndex < tacticalLength; tacticalIndex++) {
                         tactical = modelTacticals[tacticalIndex];
                         tacticals[tactical.name] = true;
                         filterTacticals[tactical.name] = filterTacticals[tactical.name] !== false;
                       }
-                      if (modelTacticals.length === 0 || !FilterService.isFiltered(modelTacticals, filterTacticals)) {
+                    } else {
+                      tacticals['None'] = true;
+                      filterTacticals['None'] = filterTacticals['None'] !== false;
+                    }
+                    if (!FilterService.isFiltered(modelAttacks, filterAttacks)
+                      || ((!modelAttacks || !modelAttacks.length) && filterAttacks['None'] !== false)) {
+                      if (!FilterService.isFiltered(modelTacticals, filterTacticals)
+                        || ((!modelTacticals || !modelTacticals.length) && filterTacticals['None'] !== false)) {
                         let modelStats = model.stats, modelStat, outOfStatRange = false;
                         for (const statKey of this.stats) {
                           modelStat = +modelStats[statKey].value;
@@ -261,9 +273,7 @@ export class FilterService {
   }
 
   private missing(key:string, model:any) {
-    if (false) {
-      console.log("Model does not match", key, model);
-    }
+      // console.log("Model does not match", key, model);
   }
 
   private containsText(model) {
