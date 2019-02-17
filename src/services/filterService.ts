@@ -5,16 +5,16 @@ import * as localForage from 'localforage';
 @autoinject()
 export class FilterService {
   sortValues: string[] = ["wyrd","name","cost"]
-  filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}};
+  filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
   options:any = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
-  costMax: number = 16;
-  costMin: number = 0;
   factions: any = [];
   types: any = [];
   keywords: any = [];
   rules: any = [];
   attacks: any = [];
   tacticals: any = [];
+  stats: any = ["cost","df","wp","health","mv"];
+  statsRanged = {"cost":{max:0,min:0}, "df":{max:0,min:0}, "wp":{max:0,min:0}, "health":{max:0,min:0}, "mv":{max:0,min:0}};
   filterChangeFunction: any = null;
   crewLegalOnly: boolean = false;
   taxFreeOnly: boolean = false;
@@ -27,11 +27,22 @@ export class FilterService {
     painted:[],
     favourites:[]
   };
+  loaded:any = {filters:false,options:false,custom:false};
 
   constructor(private crewBuilderService: CrewBuilderService) {
     this.loadFilters();
     this.loadOptions();
     this.loadCustom();
+  }
+
+  private loadComplete(name:string) {
+    this.loaded[name] = true;
+    for (const loadedName of Reflect.ownKeys(this.loaded)) {
+      if (!this.loaded[loadedName]) {
+        return;
+      }
+    }
+    this.filterChange();
   }
 
   filterChange():void {
@@ -71,8 +82,21 @@ export class FilterService {
   }
 
   filter(data): any {
-    const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {}, attacks = {}, tacticals = {};
+    const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {}, attacks = {}, tacticals = {}, definedStats = {};
     if (data) {
+
+
+      const filterTypes = (this.filters.types = this.filters.types || {}),
+        filterFaction = (this.filters.faction = this.filters.faction || {}),
+        filterKeywords = (this.filters.keywords = this.filters.keywords || {}),
+        filterRules = (this.filters.rules = this.filters.rules || {}),
+        filterAttacks = (this.filters.attacks = this.filters.attacks || {}),
+        filterTacticals = (this.filters.tacticals = this.filters.tacticals || {}),
+        filterStats = (this.filters.statFilters = this.filters.statFilters || {});
+
+      for (const statKey of this.stats) {
+        definedStats[statKey] = !!filterStats[statKey];
+      }
       for (const faction in data.factions) {
         filteredData.factions[faction] = {models: [], name: faction};
         let filteredDataFactionModels = filteredData.factions[faction].models;
@@ -92,13 +116,6 @@ export class FilterService {
         if (this.options && this.options.sort && this.options.sort.reverseSort) {
           data.factions[faction].models.reverse();
         }
-
-        const filterTypes = (this.filters.types = this.filters.types || {}),
-          filterFaction = (this.filters.faction = this.filters.faction || {}),
-          filterKeywords = (this.filters.keywords = this.filters.keywords || {}),
-          filterRules = (this.filters.rules = this.filters.rules || {}),
-          filterAttacks = (this.filters.attacks = this.filters.attacks || {}),
-          filterTacticals = (this.filters.tacticals = this.filters.tacticals || {});
 
         let factionModels = data.factions[faction].models;
         for (let factionModelIndex = 0, factionModelLength = factionModels.length, model; factionModelIndex < factionModelLength; factionModelIndex++) {
@@ -140,7 +157,7 @@ export class FilterService {
                 if (!FilterService.isFiltered(modelKeywords, filterKeywords)
                   || (!modelKeywords && filterKeywords['None'] !== false)) {
                   let modelRules = model.rules;
-                  for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++){
+                  for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++) {
                     rule = modelRules[ruleIndex];
                     rules[rule.name] = true;
                     filterRules[rule.name] = filterRules[rule.name] !== false;
@@ -152,17 +169,31 @@ export class FilterService {
                       attacks[attack.name] = true;
                       filterAttacks[attack.name] = filterAttacks[attack.name] !== false;
                     }
-                    if (!FilterService.isFiltered(modelAttacks, filterAttacks)) {
+                    if (modelAttacks.length === 0 || !FilterService.isFiltered(modelAttacks, filterAttacks)) {
                       let modelTacticals = model.tacticals;
                       for (let tacticalIndex = 0, tacticalLength = modelTacticals.length, tactical; tacticalIndex < tacticalLength; tacticalIndex++) {
                         tactical = modelTacticals[tacticalIndex];
                         tacticals[tactical.name] = true;
                         filterTacticals[tactical.name] = filterTacticals[tactical.name] !== false;
                       }
-                      if (!FilterService.isFiltered(modelTacticals, filterTacticals)) {
-                        let modelCost = model.stats.cost.value;
-                        if ((modelCost >= this.costMin && modelCost <= this.costMax)
-                          && (!this.freeText || this.containsText(model))) {
+                      if (modelTacticals.length === 0 || !FilterService.isFiltered(modelTacticals, filterTacticals)) {
+                        let modelStats = model.stats, modelStat, outOfStatRange = false;
+                        for (const statKey of this.stats) {
+                          modelStat = +modelStats[statKey].value;
+                          filterStats[statKey] = definedStats[statKey] ? filterStats[statKey] : (filterStats[statKey] ? {
+                            min: 0,
+                            max: Math.max(+filterStats[statKey].max, modelStat)
+                          } : {min: 0, max: modelStat});
+                          this.statsRanged[statKey] = {
+                            min: 0,
+                            max: Math.max(+this.statsRanged[statKey].max, +modelStat)
+                          };
+                          if (+modelStat < +filterStats[statKey].min || +modelStat > +filterStats[statKey].max) {
+                            outOfStatRange = true;
+                            this.missing(statKey, model);
+                          }
+                        }
+                        if (!outOfStatRange && (!this.freeText || this.containsText(model))) {
                           if (this.crewBuilderService.isBuilding) {
                             model.tax = this.crewBuilderService.calculateModelTax(model);
                             let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
@@ -175,42 +206,64 @@ export class FilterService {
                           } else {
                             filteredDataFactionModels.push(model);
                           }
+                        } else {
+                          this.missing("FreeText", model);
                         }
+                      } else {
+                        this.missing("Tacticals", model);
                       }
+                    } else {
+                      this.missing("Attacks", model);
                     }
+                  } else {
+                    this.missing("Rules", model);
                   }
+                } else {
+                  this.missing("Keywords", model);
                 }
+              } else {
+                this.missing("Characteristics", model);
               }
+            } else {
+              this.missing("Faction", model);
             }
+          } else {
+            this.missing("Custom", model);
           }
         }
-        this.types = Object.keys(types);
-        this.types.sort((a, b) => {
-          return FilterService.stringCompare(a, b)
-        });
-        this.keywords = Object.keys(keywords);
-        this.keywords.sort((a, b) => {
-          return FilterService.stringCompare(a, b)
-        });
-        this.factions = Object.keys(factions);
-        this.factions.sort((a, b) => {
-          return FilterService.stringCompare(a, b)
-        });
-        this.rules = Object.keys(rules);
-        this.rules.sort((a, b) => {
-          return FilterService.stringCompare(a, b)
-        });
-        this.attacks = Object.keys(attacks);
-        this.attacks.sort((a, b) => {
-          return FilterService.stringCompare(a, b);
-        });
-        this.tacticals = Object.keys(tacticals);
-        this.tacticals.sort((a, b) => {
-          return FilterService.stringCompare(a, b);
-        });
       }
+      this.types = Object.keys(types);
+      this.types.sort((a, b) => {
+        return FilterService.stringCompare(a, b)
+      });
+      this.keywords = Object.keys(keywords);
+      this.keywords.sort((a, b) => {
+        return FilterService.stringCompare(a, b)
+      });
+      this.factions = Object.keys(factions);
+      this.factions.sort((a, b) => {
+        return FilterService.stringCompare(a, b)
+      });
+      this.rules = Object.keys(rules);
+      this.rules.sort((a, b) => {
+        return FilterService.stringCompare(a, b)
+      });
+      this.attacks = Object.keys(attacks);
+      this.attacks.sort((a, b) => {
+        return FilterService.stringCompare(a, b);
+      });
+      this.tacticals = Object.keys(tacticals);
+      this.tacticals.sort((a, b) => {
+        return FilterService.stringCompare(a, b);
+      });
     }
     return filteredData;
+  }
+
+  private missing(key:string, model:any) {
+    if (false) {
+      console.log("Model does not match", key, model);
+    }
   }
 
   private containsText(model) {
@@ -309,6 +362,7 @@ export class FilterService {
         }
         this.filters = Object.assign(this.filters, value);
       }
+      this.loadComplete("filters");
     });
   }
 
@@ -321,6 +375,7 @@ export class FilterService {
       if (value) {
         this.options = Object.assign(this.options, value);
       }
+      this.loadComplete("options");
     });
   }
 
@@ -337,6 +392,7 @@ export class FilterService {
       if (value) {
         this.custom = Object.assign(this.custom, value);
       }
+      this.loadComplete("custom");
     });
   }
 }

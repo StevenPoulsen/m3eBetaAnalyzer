@@ -40,10 +40,14 @@
       </div>
     </filter-section>
 
-    <filter-section name.bind="'Cost'">
-      <div class="inputWrapper">
-        <label>Min.: <input type="number" value.bind="filterService.costMin" input.delegate="filterService.filterChange()" /></label>
-        <label>Max.: <input type="number" value.bind="filterService.costMax" input.delegate="filterService.filterChange()" /></label>
+    <filter-section name.bind="'Stats'">
+      <div class="inputWrapper" repeat.for="stat of filterService.stats">
+        <div class="capitalize">${stat}:</div>
+        <div class="statRange">
+          <label><input type="number" value.bind="filterService.filters.statFilters[stat].min" input.delegate="filterService.filterChange()" /></label>
+          <span>-</span>
+          <label><input type="number" value.bind="filterService.filters.statFilters[stat].max" input.delegate="filterService.filterChange()" /></label>
+        </div>
       </div>
     </filter-section>
 

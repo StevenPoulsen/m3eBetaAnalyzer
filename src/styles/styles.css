@@ -159,6 +159,21 @@ ul li {
   color: #333;
 }
 
+.filterMenu .statRange {
+  display:flex;
+  justify-content: space-between;
+  margin: 0 0 4px;
+}
+.filterMenu .statRange span {
+  padding: 0 4px;
+}
+.filterMenu .statRange label input {
+  width: 100%;
+  border:none;
+  margin: 0 auto;
+  text-align: center;
+}
+
 .modify {
   display: flex;
 }
