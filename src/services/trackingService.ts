@@ -1,5 +1,6 @@
 export class TrackingService {
   static initialized:boolean = false;
+  static currentPath:string = "";
 
   public static init() {
     //<!-- Global site tag (gtag.js) - Google Analytics -->
@@ -15,7 +16,6 @@ export class TrackingService {
     window["dataLayer"] = window["dataLayer"] || [];
     TrackingService.initialized = true;
     TrackingService.gtag('js', new Date());
-    TrackingService.gtag('config', 'UA-10664853-3');
   }
 
   private static gtag(...args: any[]) {
@@ -23,6 +23,13 @@ export class TrackingService {
       window["dataLayer"].push(arguments);
     } else {
       console.log("Not tracking event: ", JSON.stringify(args));
+    }
+  }
+
+  public static page(path:string) {
+    if (path && path !== TrackingService.currentPath) {
+      TrackingService.currentPath = path;
+      TrackingService.gtag('config', 'UA-10664853-3', {'page_path': path});
     }
   }
 

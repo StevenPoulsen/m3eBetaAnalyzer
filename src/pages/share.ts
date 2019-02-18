@@ -11,6 +11,7 @@ export class Share {
 
   activate(params) {
     if (params && params.f) {
+      TrackingService.page("/share");
       TrackingService.event('viewShare', 'share', params.f, null);
       this.readSharedCrew(params);
     } else {

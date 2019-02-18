@@ -4,6 +4,7 @@ import {FilterService} from "../services/filterService";
 import { EventAggregator } from 'aurelia-event-aggregator';
 import {MenuService} from "../services/menuService";
 import {CrewBuilderService} from "../services/crewBuilderService";
+import {TrackingService} from "../services/trackingService";
 
 
 @autoinject
@@ -41,6 +42,7 @@ export class Summary {
       });
       menuService.activeLeftMenu();
     }
+    TrackingService.page("/");
   }
 
   activate() {

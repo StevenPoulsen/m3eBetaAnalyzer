@@ -23,6 +23,7 @@ export class Print {
   constructor(private crewBuilderService: CrewBuilderService, private dataService: DataService, private trackingService: TrackingService, private suitConverter: SuitValueConverter, private router: AppRouter) {
     this.loadCrew();
     this.setEdition();
+    TrackingService.page("/print");
     window.addEventListener("beforeprint", function(event) {
       TrackingService.event("print", "crewPrint", null, null);
     });
