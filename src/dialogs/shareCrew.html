@@ -9,13 +9,13 @@
           Link
         </label>
         <div>
-          <input id="shareLink" type="text" value.bind="shareLink" readonly="readonly" hammer-tap.call="copyShareLink()" />
+          <input id="shareLink" type="text" value.bind="shareLink" click.trigger="copyShareLink()" />
         </div>
         <label for="shareText" class="headline">
           Text
         </label>
         <div>
-          <textarea id="shareText" value.bind="shareText" style.bind="shareTextHeight" hammer-tap.call="copyShareText()"></textarea>
+          <textarea id="shareText" value.bind="shareText" style.bind="shareTextHeight" click.trigger="copyShareText()"></textarea>
         </div>
         <div>
           <div class="button" hammer-tap.call="close()">Close</div>

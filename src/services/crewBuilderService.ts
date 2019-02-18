@@ -115,7 +115,6 @@ export class CrewBuilderService {
       }
     }
     this.currentCrew.models[type].push(this.extractCrewModel(model));
-    console.log("Model added", model,this.currentCrew.models.master.length);
     this.publishUpdateEvent();
     this.lastModified = new Date().getTime();
   }
@@ -235,17 +234,12 @@ export class CrewBuilderService {
 
   private setLeader(model): void {
     this.currentCrew.leader = model.name;
-    this.currentCrew.keywords = model.keywords;
+    this.currentCrew.keywords = model.crewKeywords ? model.keywords.concat(model.crewKeywords) : model.keywords;
     for (let rule of model.rules) {
       if (rule && rule.text) {
-        const extraKeyword = rule.text.match(/When hiring, this model is treated as having the (.*) Keyword./i);
-        if (extraKeyword && extraKeyword[1]) {
-          this.currentCrew.keywords.push(extraKeyword[1].toUpperCase());
-        } else {
-          const extraVersatile = rule.text.match(/when hiring, Crews containing this model treat (.*)s in their declared Faction as though they were Versatile/i);
-          if (extraVersatile && extraVersatile[1]) {
-            this.currentCrew.extraVersatile.push(extraVersatile[1]);
-          }
+        const extraVersatile = rule.text.match(/when hiring, Crews containing this model treat (.*)s in their declared Faction as though they were Versatile/i);
+        if (extraVersatile && extraVersatile[1]) {
+          this.currentCrew.extraVersatile.push(extraVersatile[1]);
         }
       }
     }
@@ -306,7 +300,7 @@ export class CrewBuilderService {
       }
 
       for (const keyword of this.currentCrew.keywords) {
-        if (model.keywords.includes(keyword)) {
+        if (model.keywords.includes(keyword) || (model.crewKeywords && model.crewKeywords.includes(keyword))) {
           return 0;
         }
       }

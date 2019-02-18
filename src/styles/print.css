@@ -429,3 +429,16 @@
     display: none;
   }
 }
+
+@supports (-moz-appearance:none) {
+  .m2e .front .statsWrapper .stats .headerRow,
+  .m2e .back .base,
+  .actionsWrapper .actionHead {
+    color: #000;
+  }
+  .m2e .front .statsWrapper .stats .headerRow:before,
+  .m2e .back .base:before,
+  .actionsWrapper .actionHead:before {
+    border-bottom-color: #ccc;
+  }
+}

@@ -146,6 +146,9 @@ export class FilterService {
               if (!FilterService.isFiltered(modelCharacteristics, filterTypes)) {
                 let modelKeywords = model.keywords;
                 if (modelKeywords) {
+                  if (this.crewBuilderService.isBuilding && model.crewKeywords) {
+                    modelKeywords = modelKeywords.concat(model.crewKeywords);
+                  }
                   for (let keywordIndex = 0, keywordLength = modelKeywords.length, keyword; keywordIndex < keywordLength; keywordIndex++) {
                     keyword = modelKeywords[keywordIndex];
                     keywords[keyword] = true;
@@ -315,6 +318,9 @@ export class FilterService {
       for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++) {
         rule = modelRules[ruleIndex];
         if (rule.text && rule.text.toLowerCase().includes(text)) {
+          return true;
+        }
+        if (rule.name && rule.name.toLowerCase().includes(text)) {
           return true;
         }
       }

@@ -9,7 +9,7 @@ interface VersionDataEntry {
 }
 
 export class DataService {
-  private appVersion: string = "0.6";
+  private appVersion: string = "0.7";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists"},
@@ -319,7 +319,27 @@ export class DataService {
       model.id = factionInfo.id + "_" + data.models.length;
       data.models.push(model);
     }
+    this.addModelCrewBuilderKeywords(data);
     this.addFactionData(version, data);
+  }
+
+  private addModelCrewBuilderKeywords(data) {
+      for (const model of data.models) {
+        if (!model || !model.rules) {
+          continue;
+        }
+        for (const rule of model.rules) {
+          if (rule && rule.text) {
+            const extraKeyword = rule.text.match(/When hiring, this model is treated as having the (.*) Keyword./i);
+            if (extraKeyword && extraKeyword[1]) {
+              if (!model.crewKeywords) {
+                model.crewKeywords = [];
+              }
+              model.crewKeywords.push(extraKeyword[1].toUpperCase());
+            }
+          }
+        }
+    }
   }
 
   public consumeFactionUpgrades(version: string, faction: string, upgrades: string): void {
