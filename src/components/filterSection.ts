@@ -1,6 +1,7 @@
 import {bindable,autoinject} from 'aurelia-framework';
 import {FilterService} from "../services/filterService";
 import {ShownService} from "../services/shownService";
+import {EventAggregator} from 'aurelia-event-aggregator';
 
 @autoinject()
 export class FilterSection {
@@ -11,11 +12,17 @@ export class FilterSection {
   @bindable
   private count: number;
   private show:boolean = false;
+  private showFilterModifiers: boolean = false;
+  private isFiltering: boolean = false;
 
-  constructor(private filterService:FilterService, private shownService: ShownService) {}
+  constructor(private filterService:FilterService, private shownService: ShownService, private ea:EventAggregator) {}
 
   bind() {
     this.show = this.shownService.getShown("filterSection", this.name);
+    this.showFilterModifiers = !!this.filterService.filters[this.filter];
+    this.ea.subscribe("filterChanged", (data) => {
+      this.isFiltering = data.filtering[this.filter];
+    });
   }
 
   invert() {

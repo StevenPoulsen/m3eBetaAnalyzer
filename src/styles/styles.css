@@ -401,9 +401,15 @@ ux-dialog-head {
   border: solid transparent 5px;
   border-left-color: #000;
 }
+.expandable.filtering:before {
+  border-left-color: #393;
+}
 .expandable.shown:before {
   border-left-color: transparent;
   border-top-color: #000;
+}
+.expandable.filtering.shown:before {
+  border-top-color: #393;
 }
 .mobileMenuToggler {
   display: none;

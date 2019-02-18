@@ -40,18 +40,18 @@
       </div>
     </filter-section>
 
-    <filter-section name.bind="'Stats'">
+    <filter-section name.bind="'Stats'" filter.bind="'stats'">
       <div class="inputWrapper" repeat.for="stat of filterService.stats">
         <div class="capitalize">${stat}:</div>
         <div class="statRange">
-          <label><input type="number" value.bind="filterService.filters.statFilters[stat].min" input.delegate="filterService.filterChange()" /></label>
+          <label><input type="number" value.bind="filterService.filters.statFilters[stat].min" input.delegate="filterService.filterChange()" placeholder="Min." /></label>
           <span>-</span>
-          <label><input type="number" value.bind="filterService.filters.statFilters[stat].max" input.delegate="filterService.filterChange()" /></label>
+          <label><input type="number" value.bind="filterService.filters.statFilters[stat].max" input.delegate="filterService.filterChange()" placeholder="Max." /></label>
         </div>
       </div>
     </filter-section>
 
-    <filter-section name.bind="'Text'">
+    <filter-section name.bind="'Text'" filter.bind="'text'">
       <div class="inputWrapper">
         <label><input type="text" class="fullWidth" value.bind="filterService.freeText & debounce" /></label>
       </div>
@@ -63,7 +63,7 @@
       </div>
     </filter-section>
     
-    <filter-section name.bind="'Crew builder'" if.bind="filterService.crewBuilderService.isBuilding">
+    <filter-section name.bind="'Crew builder'" if.bind="filterService.crewBuilderService.isBuilding" filter.bind="'crewBuilder'">
       <div class="inputWrapper">
         <label><input type="checkbox" checked.bind="filterService.crewLegalOnly" change.delegate="filterService.filterChange()" /> Crew Legal</label>
       </div>
@@ -71,5 +71,7 @@
         <label><input type="checkbox" checked.bind="filterService.taxFreeOnly" change.delegate="filterService.filterChange()" /> Tax free</label>
       </div>
     </filter-section>
+
+    <div class="button" hammer-tap.call="filterService.clearFilters()">Reset all filters</div>
   </div>
 </template>

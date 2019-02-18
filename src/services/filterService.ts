@@ -1,5 +1,6 @@
 import {CrewBuilderService, BuyProblem} from "./crewBuilderService";
 import {autoinject,observable} from "aurelia-framework";
+import {EventAggregator} from 'aurelia-event-aggregator';
 import * as localForage from 'localforage';
 
 @autoinject()
@@ -7,6 +8,15 @@ export class FilterService {
   sortValues: string[] = ["wyrd","name","cost"]
   filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
   options:any = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
+  crewLegalOnly: boolean = false;
+  taxFreeOnly: boolean = false;
+  @observable()
+  freeText: string;
+  custom:any = {
+    owned:[],
+    painted:[],
+    favourites:[]
+  };
   factions: any = [];
   types: any = [];
   keywords: any = [];
@@ -16,20 +26,11 @@ export class FilterService {
   stats: any = ["cost","df","wp","health","mv"];
   statsRanged = {"cost":{max:0,min:0}, "df":{max:0,min:0}, "wp":{max:0,min:0}, "health":{max:0,min:0}, "mv":{max:0,min:0}};
   filterChangeFunction: any = null;
-  crewLegalOnly: boolean = false;
-  taxFreeOnly: boolean = false;
-  @observable()
-  freeText: string;
   quickShows:string[] = ["factions","types","keywords","cost","mv","df","wp","sz"];
   customTypes:string[] = ["owned","painted","favourites","other"];
-  custom:any = {
-    owned:[],
-    painted:[],
-    favourites:[]
-  };
   loaded:any = {filters:false,options:false,custom:false};
 
-  constructor(private crewBuilderService: CrewBuilderService) {
+  constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator) {
     this.loadFilters();
     this.loadOptions();
     this.loadCustom();
@@ -84,7 +85,7 @@ export class FilterService {
   filter(data): any {
     const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {}, attacks = {}, tacticals = {}, definedStats = {};
     if (data) {
-
+      const isFiltering = {};
 
       const filterTypes = (this.filters.types = this.filters.types || {}),
         filterFaction = (this.filters.faction = this.filters.faction || {}),
@@ -192,55 +193,68 @@ export class FilterService {
                         let modelStats = model.stats, modelStat, outOfStatRange = false;
                         for (const statKey of this.stats) {
                           modelStat = +modelStats[statKey].value;
-                          filterStats[statKey] = definedStats[statKey] ? filterStats[statKey] : (filterStats[statKey] ? {
-                            min: 0,
-                            max: Math.max(+filterStats[statKey].max, modelStat)
-                          } : {min: 0, max: modelStat});
                           this.statsRanged[statKey] = {
                             min: 0,
                             max: Math.max(+this.statsRanged[statKey].max, +modelStat)
                           };
-                          if (+modelStat < +filterStats[statKey].min || +modelStat > +filterStats[statKey].max) {
+                          if ((filterStats[statKey] && filterStats[statKey].min && +modelStat < +filterStats[statKey].min)
+                            || (filterStats[statKey] && filterStats[statKey].max && +modelStat > +filterStats[statKey].max)) {
                             outOfStatRange = true;
                             this.missing(statKey, model);
                           }
                         }
-                        if (!outOfStatRange && (!this.freeText || this.containsText(model))) {
-                          if (this.crewBuilderService.isBuilding) {
-                            model.tax = this.crewBuilderService.calculateModelTax(model);
-                            let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
-                            if (this.crewBuilderService.isBuilding &&
-                              (!this.crewLegalOnly || !buyProblem.hide) &&
-                              (!this.taxFreeOnly || model.tax <= 0)) {
-                              model.problem = this.crewLegalOnly ? buyProblem.name : '';
+                        if (!outOfStatRange) {
+                          if ((!this.freeText || this.containsText(model))) {
+                            if (this.crewBuilderService.isBuilding) {
+                              model.tax = this.crewBuilderService.calculateModelTax(model);
+                              let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
+                              if (this.crewBuilderService.isBuilding &&
+                                (!this.crewLegalOnly || !buyProblem.hide) &&
+                                (!this.taxFreeOnly || model.tax <= 0)) {
+                                model.problem = this.crewLegalOnly ? buyProblem.name : '';
+                                filteredDataFactionModels.push(model);
+                              } else {
+                                isFiltering["crewBuilder"] = true;
+                                this.missing("crewBuilder", model);
+                              }
+                            } else {
                               filteredDataFactionModels.push(model);
                             }
                           } else {
-                            filteredDataFactionModels.push(model);
+                            isFiltering["text"] = true;
+                            this.missing("text", model);
                           }
                         } else {
-                          this.missing("FreeText", model);
+                          isFiltering["stats"] = true;
+                          this.missing("stats", model);
                         }
                       } else {
-                        this.missing("Tacticals", model);
+                        isFiltering["tacticals"] = true;
+                        this.missing("tacticals", model);
                       }
                     } else {
-                      this.missing("Attacks", model);
+                      isFiltering["attacks"] = true;
+                      this.missing("attacks", model);
                     }
                   } else {
-                    this.missing("Rules", model);
+                    isFiltering["rules"] = true;
+                    this.missing("rules", model);
                   }
                 } else {
-                  this.missing("Keywords", model);
+                  isFiltering["keywords"] = true;
+                  this.missing("keywords", model);
                 }
               } else {
-                this.missing("Characteristics", model);
+                isFiltering["types"] = true;
+                this.missing("types", model);
               }
             } else {
-              this.missing("Faction", model);
+              isFiltering["faction"] = true;
+              this.missing("faction", model);
             }
           } else {
-            this.missing("Custom", model);
+            isFiltering["custom"] = true;
+            this.missing("custom", model);
           }
         }
       }
@@ -268,12 +282,27 @@ export class FilterService {
       this.tacticals.sort((a, b) => {
         return FilterService.stringCompare(a, b);
       });
+      this.ea.publish("filterChanged", {filtering:isFiltering});
     }
     return filteredData;
   }
 
   private missing(key:string, model:any) {
       // console.log("Model does not match", key, model);
+  }
+
+  clearFilters() {
+    this.filters = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
+    this.options = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
+    this.crewLegalOnly = false;
+    this.taxFreeOnly = false;
+    this.freeText = "";
+    this.custom = {
+      owned:[],
+      painted:[],
+      favourites:[]
+    };
+    this.filterChange();
   }
 
   private containsText(model) {
