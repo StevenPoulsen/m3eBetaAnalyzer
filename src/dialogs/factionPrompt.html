@@ -4,7 +4,10 @@
       Choose faction
     </ux-dialog-head>
     <ux-dialog-body>
-      <div class="factionIcon ${faction}" repeat.for="faction of factions" hammer-tap.call="controller.ok(faction)"><img src="${'/images/'+getImage(faction)}" alt="${faction}"/></div>
+      <div class="factionIconsWrapper">
+        <div class="factionIcon ${faction}" repeat.for="faction of factions" hammer-tap.call="controller.ok(faction)"><img src="${'/images/'+getImage(faction)}" alt="${faction}"/></div>
+      </div>
+      <div class="button" if.bind="skipable" hammer-tap.call="controller.cancel()">Skip</div>
     </ux-dialog-body>
   </ux-dialog>
 </template>

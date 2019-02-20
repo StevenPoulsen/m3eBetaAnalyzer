@@ -244,7 +244,7 @@ export class CrewBuilderService {
       }
     }
     this.currentCrew.leaderType = this.getModelType(model);
-    if (!this.currentCrew.faction) {
+    if (!this.currentCrew.faction || !model.factions.includes(this.currentCrew.faction)) {
       if (model.factions.length > 1 && model.factions[1] !== "Dead Man's Hand") {
         this.dialogService.open({
           viewModel: FactionPrompt, model: {
@@ -388,9 +388,9 @@ export class CrewBuilderService {
     return usage;
   }
 
-  public newCrew(): void {
+  public newCrew(faction:string = ""): void {
     this.currentCrew = {
-      faction: "",
+      faction: faction ? faction : "",
       leader: "",
       keywords: [],
       extraVersatile: [],

@@ -18,8 +18,7 @@ export class Faction {
   }
 
   bind() {
-    this.groupType = this.filterService.options.sort.modelGroupBy;
-    console.log("Faction", this.groupType);
+    this.groupType = this.filterService.options.modelGroupBy;
     this.shown = this.groupType === "none" ? true : this.shownService.getShown(this.groupType, this.faction.name);
     switch (this.groupType) {
       case "faction":

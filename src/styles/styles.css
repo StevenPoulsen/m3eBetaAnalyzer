@@ -219,6 +219,9 @@ ul li {
   display: flex;
   background: #eee;
 }
+.faction .factionTitle {
+  background: none transparent;
+}
 .factionTitle img {
   width: 40px;
   height: 40px;
@@ -228,10 +231,17 @@ ul li {
   line-height: 40px;
 }
 
+.factionIconsWrapper {
+  display: flex;
+  justify-content: center;
+  max-width: 300px;
+  flex-wrap: wrap;
+}
+
 .factionIcon {
   width: 116px;
   height: 116px;
-  margin: 10px auto;
+  margin: 10px;
 }
 
 ux-dialog-head {

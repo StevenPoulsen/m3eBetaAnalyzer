@@ -5,12 +5,20 @@ import {FilterService} from "../services/filterService";
 import {DialogService} from "aurelia-dialog";
 import {Confirm} from "../dialogs/confirm";
 import {MenuService} from "../services/menuService";
+import {FactionPrompt} from "../dialogs/factionPrompt";
+import {DataService} from "../services/dataService";
 
 @autoinject()
 export class Crews {
   private crews = [];
 
-  constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator, private filterService: FilterService, private dialogService:DialogService, private menuService: MenuService) {
+  constructor(
+    private crewBuilderService: CrewBuilderService,
+    private dataService: DataService,
+    private ea: EventAggregator,
+    private filterService: FilterService,
+    private dialogService:DialogService,
+    private menuService: MenuService) {
     ea.subscribe("crewSave", () => {
       this.crewBuilderService.getCrews().then(crews => {
         this.crews = crews;
@@ -66,11 +74,23 @@ export class Crews {
   }
 
   createCrew() {
-    this.crewBuilderService.newCrew();
-    this.menuService.showRightMenu();
-    this.filterService.setCrewLegalOnly(true);
-    this.filterService.setQuickShow("cost", true);
-    this.filterService.filterChange();
+    this.dialogService.open({viewModel:FactionPrompt, model: {
+        factions:this.dataService.getSelectableFactionKeys(),
+        skipable: true
+      }, lock: false}).whenClosed(response => {
+        let faction = null;
+        if (!response.wasCancelled) {
+          faction = response.output;
+        }
+      this.menuService.showRightMenu();
+      const filterValues = this.filterService.getResetValues();
+      filterValues.crewLegalOnly = true;
+      filterValues.options.quickShow.push("cost");
+      filterValues.options.sort.modelSorts = ["tax","wyrd"];
+      filterValues.options.modelGroupBy = "type";
+      this.filterService.updateWithValues(filterValues);
+      this.crewBuilderService.newCrew(this.dataService.getFactionDisplayName(faction));
+    });
   }
 
 }

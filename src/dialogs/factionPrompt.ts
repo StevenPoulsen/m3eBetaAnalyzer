@@ -7,6 +7,7 @@ import {DataService} from "../services/dataService";
 @useView('./factionPrompt.html')
 export class FactionPrompt {
   private factions = [];
+  private skipable:boolean = false;
 
   constructor(private controller: DialogController, private dataService: DataService){}
 
@@ -14,6 +15,7 @@ export class FactionPrompt {
     if (factions && factions.factions) {
       this.factions = factions.factions;
     }
+    this.skipable = factions && factions.skipable;
   }
 
   getImage(faction){

@@ -7,7 +7,7 @@
       <div class="inputWrapper">
         <label>
           Sort by:
-          <select name="modelSort" value.bind="filterService.options.sort.modelSorts[0]" change.delegate="filterChange()" >
+          <select name="modelSort" value.bind="filterService.options.sort.modelSorts[0]" change.delegate="filterChange()" class="capitalize">
             <option repeat.for="sort of filterService.sortValues"
                     value.bind="sort">
               ${sort}
@@ -18,7 +18,7 @@
       <div class="inputWrapper">
         <label>
           Then by:
-          <select name="modelSort" value.bind="filterService.options.sort.modelSorts[1]" change.delegate="filterChange()" >
+          <select name="modelSort" value.bind="filterService.options.sort.modelSorts[1]" change.delegate="filterChange()" class="capitalize">
             <option repeat.for="sort of filterService.sortValues"
                     value.bind="sort">
               ${sort}
@@ -40,9 +40,10 @@
       </label>
     </div>
     </filter-section>
-    <filter-section name.bind="'Group by'">
+    <filter-section name.bind="'Group'">
       <label>
-        <select name="modelGroupBy" value.bind="filterService.options.sort.modelGroupBy" change.delegate="filterChange()">
+        Group by:
+        <select name="modelGroupBy" value.bind="filterService.options.modelGroupBy" change.delegate="filterChange()" class="capitalize">
           <option repeat.for="groupBy of filterService.groupByValues" value.bind="groupBy">${groupBy}</option>
         </select>
       </label>

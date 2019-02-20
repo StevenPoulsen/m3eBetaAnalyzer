@@ -8,7 +8,7 @@ export class FilterService {
   sortValues: string[] = ["wyrd","name","cost", "mv", "df", "wp", "health", "tax"];
   groupByValues: string[] = ["faction", "type", "none"];
   filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
-  options:any = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]], modelGroupBy:"faction"}};
+  options:any = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]]}, modelGroupBy:"faction"};
   crewLegalOnly: boolean = false;
   taxFreeOnly: boolean = false;
   @observable()
@@ -80,13 +80,19 @@ export class FilterService {
   }
 
   setQuickShow(key:string, show:boolean) {
-    this.options.quickShow[key] = show;
+    const i = this.options.quickShow.indexOf(key);
+    if (show && i == -1) {
+      this.options.quickShow.push(key);
+    } else {
+      if (i > -1) {
+        this.options.quickShow = this.options.quickShow.slice(i,1);
+      }
+    }
   }
 
   filter(data): any {
     const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {}, attacks = {}, tacticals = {}, definedStats = {};
     if (data) {
-      console.log("Filtering", this.options.sort.modelGroupBy);
       const isFiltering = {};
 
       const filterTypes = (this.filters.types = this.filters.types || {}),
@@ -100,15 +106,19 @@ export class FilterService {
       for (const statKey of this.stats) {
         definedStats[statKey] = !!filterStats[statKey];
       }
-      for (const faction in data.factions) {
 
-        for (const customType of this.customTypes) {
-          this.filters.custom[customType] = this.filters.custom[customType] !== false;
-        }
+      for (const customType of this.customTypes) {
+        this.filters.custom[customType] = this.filters.custom[customType] !== false;
+      }
+
+      for (const faction in data.factions) {
 
         let factionModels = data.factions[faction].models;
         for (let factionModelIndex = 0, factionModelLength = factionModels.length, model; factionModelIndex < factionModelLength; factionModelIndex++) {
           model = factionModels[factionModelIndex];
+          if (model.factions && this.crewBuilderService.isBuilding && !this.crewBuilderService.hasLeader() && !model.factions.includes(this.crewBuilderService.getCrew().faction)) {
+            continue;
+          }
           if ((this.filters.custom.owned && this.custom.owned.indexOf(model.name) > -1)
             || (this.filters.custom.painted && this.custom.painted.indexOf(model.name) > -1)
             || (this.filters.custom.favourites && this.custom.favourites.indexOf(model.name) > -1)
@@ -324,7 +334,7 @@ export class FilterService {
 
   private addModelToList(list: {}, faction:string, model: any) {
     let groupKey;
-    switch (this.options.sort.modelGroupBy) {
+    switch (this.options.modelGroupBy) {
       case "faction":
         groupKey = faction;
         break;
@@ -351,17 +361,41 @@ export class FilterService {
       // console.log("Model does not match", key, model);
   }
 
+  getResetValues():any {
+    const resetValues:any = {};
+    resetValues.filters = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
+    resetValues.options = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]]}, modelGroupBy: "faction"};
+    resetValues.crewLegalOnly = false;
+    resetValues.taxFreeOnly = false;
+    resetValues.freeText = "";
+    return resetValues;
+  }
+
+  getCurrentValues():any {
+    const currentValues:any = {};
+    currentValues.filters = {};
+    for (const filterKey of Reflect.ownKeys(this.filters)) {
+      currentValues.filters[filterKey] = Object.assign({},this.filters[filterKey]);
+    }
+    currentValues.options = {quickShow: this.options.quickShow.splice(0),
+      sort: {reverse:this.options.sort.reverse, modelSorts:this.options.sort.modelSorts.splice(0)},
+      modelGroupBy: this.options.modelGroupBy};
+    currentValues.crewLegalOnly = this.crewLegalOnly;
+    currentValues.taxFreeOnly = this.taxFreeOnly;
+    currentValues.freeText = this.freeText;
+    return currentValues;
+  }
+
+  updateWithValues(values:any):void {
+    this.filters = values.filters;
+    this.options = values.options;
+    this.crewLegalOnly = values.crewLegalOnly;
+    this.taxFreeOnly = values.taxFreeOnly;
+    this.freeText = values.freeText;
+  }
+
   clearFilters() {
-    this.filters = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
-    this.options = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]], modelGroupBy: "faction"}};
-    this.crewLegalOnly = false;
-    this.taxFreeOnly = false;
-    this.freeText = "";
-    this.custom = {
-      owned:[],
-      painted:[],
-      favourites:[]
-    };
+    this.updateWithValues(this.getResetValues());
     this.filterChange();
   }
 
@@ -477,8 +511,8 @@ export class FilterService {
       if (value) {
         this.options = Object.assign(this.options, value);
       }
-      if (!this.options.sort.modelGroupBy) {
-        this.options.sort.modelGroupBy = this.groupByValues[0];
+      if (!this.options.modelGroupBy) {
+        this.options.modelGroupBy = this.groupByValues[0];
       }
       this.loadComplete("options");
     });

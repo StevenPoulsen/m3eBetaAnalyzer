@@ -12,14 +12,14 @@ export class DataService {
   private appVersion: string = "0.8";
   private data: VersionDataEntry;
   public factions = {
-    "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists"},
-    "bayou": {"id":2,"displayName": "Bayou",key:"bayou"},
-    "dmh": {"id":3,"displayName": "Dead mans hand",key:"dmg"},
-    "guild": {"id":4,"displayName": "The Guild",key:"guild"},
-    "neverborn": {"id":5,"displayName": "Neverborn",key:"neverborn"},
-    "outcasts": {"id":6,"displayName": "Outcasts",key:"outcast"},
-    "resser": {"id":7,"displayName": "Resser",key:"resser"},
-    "tt": {"id":8,"displayName": "Ten Thunders",key:"tt"}
+    "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
+    "bayou": {"id":2,"displayName": "Bayou",key:"bayou",selectable:true},
+    "dmh": {"id":3,"displayName": "Dead Man's Hand",key:"dmg",selectable:false},
+    "guild": {"id":4,"displayName": "Guild",key:"guild",selectable:true},
+    "neverborn": {"id":5,"displayName": "Neverborn",key:"neverborn",selectable:true},
+    "outcasts": {"id":6,"displayName": "Outcasts",key:"outcasts",selectable:true},
+    "resser": {"id":7,"displayName": "Resurrectionist",key:"resser",selectable:true},
+    "tt": {"id":8,"displayName": "Ten Thunders",key:"tt",selectable:true}
   };
   private factionKeys = {
     'Arcanists': 'arcanists',
@@ -65,6 +65,17 @@ export class DataService {
 
   getFaction(faction:string) {
     return this.factions[this.getFactionKey(faction)];
+  }
+
+  getSelectableFactionKeys() {
+    const factionKeys: string[] = [];
+    for (const factionKey of Reflect.ownKeys(this.factions)) {
+      const faction = this.factions[factionKey];
+      if (faction.selectable) {
+        factionKeys.push(faction.key);
+      }
+    }
+    return factionKeys;
   }
 
   public getLatestVersionCode(): string {
