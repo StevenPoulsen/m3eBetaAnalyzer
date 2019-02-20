@@ -72,6 +72,9 @@ export class EditModel {
   }
 
   private arrayContainsAnyFromArray(array:string[], fromArray:string[]):boolean {
+    if (!array || array.length === 0) {
+      return false;
+    }
     for (const from of fromArray) {
       for (const string of array) {
         if (from.toLowerCase() === string.toLowerCase()) {

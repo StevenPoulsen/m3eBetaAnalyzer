@@ -265,7 +265,7 @@ export class CrewBuilderService {
 
   }
 
-  private getModelType(model): Type {
+  public getModelType(model): Type {
     if (model.charactaristics) {
       for (const char of model.charactaristics) {
         switch (char.toLowerCase()) {

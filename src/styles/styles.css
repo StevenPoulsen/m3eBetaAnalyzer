@@ -217,6 +217,7 @@ ul li {
   border: solid #000 2px;
   padding: 2px 4px;
   display: flex;
+  background: #eee;
 }
 .factionTitle img {
   width: 40px;

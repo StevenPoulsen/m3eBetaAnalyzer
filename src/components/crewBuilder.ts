@@ -11,13 +11,6 @@ import {ShareCrew} from "../dialogs/shareCrew";
 
 @autoinject()
 export class CrewBuilder {
-  private typeName = {
-    'master': "Masters",
-    'henchman': 'Henchmen',
-    'enforcer': 'Enforcers',
-    'minion': 'Minions',
-    'other': 'Others'
-  };
   private remaining;
   private crew;
   @observable()
@@ -114,8 +107,7 @@ export class CrewBuilder {
 
   shareCrew() {
     this.dialogService.open({viewModel:ShareCrew, model: {
-        crew: this.crewBuilderService.getCrew(),
-        typeName: this.typeName
+        crew: this.crewBuilderService.getCrew()
       }, lock: false});
   }
 }

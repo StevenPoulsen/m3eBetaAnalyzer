@@ -8,7 +8,7 @@
     </div>
     <div class="crewModels">
       <div class="section ${type}" repeat.for="type of crew.models | keys" if.bind="crew.models[type].length">
-        <div class="crewModelType">${typeName[type]}</div>
+        <div class="crewModelType">${dataService.getTypeDisplayName(type)}</div>
         <crew-model repeat.for="model of crew.models[type]" model.bind="model"></crew-model>
       </div>
     </div>

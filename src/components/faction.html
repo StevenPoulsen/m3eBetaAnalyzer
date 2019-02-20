@@ -1,6 +1,6 @@
 <template>
-  <div class="faction ${faction.name}">
-    <div class="factionTitle expandable ${shown?'shown':''}" hammer-tap.call="toggle()"><img src="${'/images/'+faction.name+'.png'}" alt="Faction logo"/><span>${dataService.getFactionDisplayName(faction.name)}: ${faction.models.length} models</span></div>
+  <div class="${groupType} ${faction.name}">
+    <div class="factionTitle expandable ${shown?'shown':''}" hammer-tap.call="toggle()"><img src="${img}" alt="Faction logo" if.bind="img"/><span>${name}: ${faction.models.length} models</span></div>
     <div show.bind="shown">
       <slot></slot>
     </div>

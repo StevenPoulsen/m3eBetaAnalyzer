@@ -1,22 +1,21 @@
 import {DialogController} from "aurelia-dialog";
 import {autoinject} from 'aurelia-framework';
 import {CrewBuilderService} from "../services/crewBuilderService";
+import {DataService} from "../services/dataService";
 
 @autoinject()
 export class ShareCrew {
 
   private shareLink;
   private shareText;
-  private typeNames;
   private shareTextHeight;
   private sharingSupported = 0;
 
-  constructor(private controller: DialogController, private crewBuilderService: CrewBuilderService) {}
+  constructor(private controller: DialogController, private crewBuilderService: CrewBuilderService, private dataService: DataService) {}
 
   activate(data) {
     this.crewBuilderService.supportsSharing().then(bool => {
       if (bool) {
-        this.typeNames = data.typeName;
         this.createShareLink();
         this.createShareText();
         this.sharingSupported = 1;
@@ -36,7 +35,7 @@ export class ShareCrew {
     text += "Beta version " + crew.versionCode + "\n";
     for (const type of Reflect.ownKeys(crew.models)) {
       if (crew.models[type] && crew.models[type].length) {
-        text += "[" + this.typeNames[type] + "]\n";
+        text += "[" + this.dataService.getTypeDisplayName(String(type)) + "]\n";
         lineCount++;
         for (const crewModel of crew.models[type]) {
           text += " - " + crewModel.name + (crewModel.name === crew.leader ? ", Leader":"") +"\n";

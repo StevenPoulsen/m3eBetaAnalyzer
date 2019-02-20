@@ -5,9 +5,10 @@ import * as localForage from 'localforage';
 
 @autoinject()
 export class FilterService {
-  sortValues: string[] = ["wyrd","name","cost"]
+  sortValues: string[] = ["wyrd","name","cost", "mv", "df", "wp", "health", "tax"];
+  groupByValues: string[] = ["faction", "type", "none"];
   filters:any = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
-  options:any = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
+  options:any = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]], modelGroupBy:"faction"}};
   crewLegalOnly: boolean = false;
   taxFreeOnly: boolean = false;
   @observable()
@@ -31,8 +32,8 @@ export class FilterService {
   loaded:any = {filters:false,options:false,custom:false};
 
   constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator) {
-    this.loadFilters();
     this.loadOptions();
+    this.loadFilters();
     this.loadCustom();
   }
 
@@ -85,6 +86,7 @@ export class FilterService {
   filter(data): any {
     const filteredData = {factions:{}}, types = {}, keywords = {}, factions = {}, rules = {}, attacks = {}, tacticals = {}, definedStats = {};
     if (data) {
+      console.log("Filtering", this.options.sort.modelGroupBy);
       const isFiltering = {};
 
       const filterTypes = (this.filters.types = this.filters.types || {}),
@@ -99,23 +101,9 @@ export class FilterService {
         definedStats[statKey] = !!filterStats[statKey];
       }
       for (const faction in data.factions) {
-        filteredData.factions[faction] = {models: [], name: faction};
-        let filteredDataFactionModels = filteredData.factions[faction].models;
-        if (this.options && this.options.sort && this.options.sort.modelSort !== "wyrd") {
-          data.factions[faction].models.sort((a, b) => {
-            switch (this.options.sort.modelSort) {
-              case "name":
-                return FilterService.stringCompare(a.name, b.name);
-              case "cost":
-                return +a.stats.cost.value - +b.stats.cost.value;
-            }
-          });
-        }
+
         for (const customType of this.customTypes) {
           this.filters.custom[customType] = this.filters.custom[customType] !== false;
-        }
-        if (this.options && this.options.sort && this.options.sort.reverseSort) {
-          data.factions[faction].models.reverse();
         }
 
         let factionModels = data.factions[faction].models;
@@ -215,13 +203,13 @@ export class FilterService {
                                 (!this.crewLegalOnly || !buyProblem.hide) &&
                                 (!this.taxFreeOnly || model.tax <= 0)) {
                                 model.problem = this.crewLegalOnly ? buyProblem.name : '';
-                                filteredDataFactionModels.push(model);
+                                this.addModelToList(filteredData.factions, faction, model);
                               } else {
                                 isFiltering["crewBuilder"] = true;
                                 this.missing("crewBuilder", model);
                               }
                             } else {
-                              filteredDataFactionModels.push(model);
+                              this.addModelToList(filteredData.factions, faction, model);
                             }
                           } else {
                             isFiltering["text"] = true;
@@ -261,6 +249,50 @@ export class FilterService {
           }
         }
       }
+
+      for (const group in filteredData.factions) {
+        if (this.options && this.options.sort && this.options.sort.modelSorts && this.options.sort.modelSorts.length && !(this.options.sort.modelSorts.length === 1 && this.options.sort.modelSorts[0] === "wyrd")) {
+          filteredData.factions[group].models.sort((a, b) => {
+            let result = 0, sortRule = 0;
+            while (result === 0 && sortRule < this.options.sort.modelSorts.length) {
+              switch (this.options.sort.modelSorts[sortRule]) {
+                case "wyrd":
+                  result = +a.id.split("_")[1] - +b.id.split("_")[1];
+                  break;
+                case "name":
+                  result = FilterService.stringCompare(a.name, b.name);
+                  break;
+                case "cost":
+                  result = (+a.stats.cost.value + (a.tax ? a.tax : 0)) - (+b.stats.cost.value + (b.tax ? b.tax : 0));
+                  break;
+                case "wp":
+                  result = +a.stats.wp.value - +b.stats.wp.value;
+                  break;
+                case "df":
+                  result = +a.stats.df.value - +b.stats.df.value;
+                  break;
+                case "mv":
+                  result = +a.stats.mv.value - +b.stats.mv.value;
+                  break;
+                case "health":
+                  result = +a.stats.health.value - +b.stats.health.value;
+                  break;
+                case "tax":
+                  result = (a.tax ? a.tax : 0) - (b.tax ? b.tax : 0);
+              }
+              sortRule++;
+            }
+            return result;
+          });
+        } else {
+          console.log("No sorting in group", group, this.options.sort.modelSorts);
+        }
+
+        if (this.options && this.options.sort && this.options.sort.reverseSort) {
+          filteredData.factions[group].models.reverse();
+        }
+      }
+
       this.types = Object.keys(types);
       this.types.sort((a, b) => {
         return FilterService.stringCompare(a, b)
@@ -290,13 +322,38 @@ export class FilterService {
     return filteredData;
   }
 
+  private addModelToList(list: {}, faction:string, model: any) {
+    let groupKey;
+    switch (this.options.sort.modelGroupBy) {
+      case "faction":
+        groupKey = faction;
+        break;
+      case "type":
+        if (!list["master"]) {
+          list["master"] = {name:"master", models:[]};
+          list["enforcer"] = {name:"enforcer", models:[]};
+          list["henchman"] = {name:"henchman", models:[]};
+          list["minion"] = {name:"minion", models:[]};
+        }
+        groupKey = this.crewBuilderService.getModelType(model);
+        break;
+      case "none":
+        groupKey = "All";
+        break;
+    }
+    if (!list[groupKey]) {
+      list[groupKey] = {name:groupKey, models:[]};
+    }
+    list[groupKey].models.push(model);
+  }
+
   private missing(key:string, model:any) {
       // console.log("Model does not match", key, model);
   }
 
   clearFilters() {
     this.filters = {faction: {}, types: {}, keywords:{}, rules:{}, custom:{}, attacks:{}, tacticals: {}, statFilters: {}};
-    this.options = {quickShow: [], sort: {reverse:false, modelSort:this.sortValues[0]}};
+    this.options = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]], modelGroupBy: "faction"}};
     this.crewLegalOnly = false;
     this.taxFreeOnly = false;
     this.freeText = "";
@@ -419,6 +476,9 @@ export class FilterService {
     localForage.getItem("options").then(value => {
       if (value) {
         this.options = Object.assign(this.options, value);
+      }
+      if (!this.options.sort.modelGroupBy) {
+        this.options.sort.modelGroupBy = this.groupByValues[0];
       }
       this.loadComplete("options");
     });

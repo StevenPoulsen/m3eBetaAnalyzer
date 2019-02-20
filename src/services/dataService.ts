@@ -30,6 +30,13 @@ export class DataService {
     "Ten Thunders": "tt",
     "Dead Man's Hand": "dmh"
   };
+  private typeName = {
+    'master': "Masters",
+    'henchman': 'Henchmen',
+    'enforcer': 'Enforcers',
+    'minion': 'Minions',
+    'other': 'Others'
+  };
   public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19", "2.14.19"];
   public currentVersion: string;
 
@@ -83,6 +90,13 @@ export class DataService {
       return "?";
     }
     return this.factions[factionKey].displayName;
+  }
+
+  public getTypeDisplayName(type:string):string {
+    if (!type || !this.typeName || !this.typeName[type]) {
+      return "?";
+    }
+    return this.typeName[type];
   }
 
   public getModel(name: string): Promise<any> {
@@ -500,6 +514,10 @@ export class DataService {
     if (match) {
       if (name.toLowerCase() === "plentiful") {
         return +match[1];
+      }
+      const orSplit = match[1].split(" or ");
+      if (orSplit && orSplit.length > 1) {
+        return orSplit;
       }
       return match[1].split(", ");
     }
