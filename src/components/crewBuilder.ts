@@ -20,6 +20,7 @@ export class CrewBuilder {
   private message: string = "";
   private messageType: string;
   private messageShow: string;
+  private missingName: boolean = false;
 
   constructor(private dataService: DataService, private crewBuilderService: CrewBuilderService, private ea: EventAggregator, private filterService: FilterService, private dialogService:DialogService, private router:AppRouter) {
     const self = this;
@@ -37,6 +38,9 @@ export class CrewBuilder {
 
   crewNameChanged(newValue, oldValue) {
     this.crewBuilderService.setCrewName(newValue);
+    if (newValue) {
+      this.missingName = false;
+    }
   }
 
   updateCrew() {
@@ -48,6 +52,11 @@ export class CrewBuilder {
   save() {
     if (!this.crewBuilderService.hasChanges) {
       this.showMessage("No changes to save");
+      return;
+    }
+    if (!this.crewName) {
+      this.showMessage("Your crew needs a name");
+      this.missingName = true;
       return;
     }
     TrackingService.event('click', 'crewSave', this.crewBuilderService.getCrew().faction, null);

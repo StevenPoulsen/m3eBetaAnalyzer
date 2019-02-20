@@ -14,9 +14,9 @@
     </div>
     <div class="listOptions">
       <div class="inputWrapper">
-        <label><input type="text" placeholder="Crew Name" value.bind="crewName" /></label>
+        <label><input class="${missingName?'invalid':''}" type="text" placeholder="Crew Name" value.bind="crewName" /></label>
       </div>
-      <div class="inputWrapper" if.bind="crewName">
+      <div class="inputWrapper">
         <div class="button ${saveSuccess?'success':''}" hammer-tap.call="save()">Save</div>
       </div>
     </div>

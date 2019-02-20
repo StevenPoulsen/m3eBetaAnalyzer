@@ -25,6 +25,10 @@ ul li {
   text-transform: capitalize;
 }
 
+.invalid {
+  background: #faa;
+}
+
 .fullWidth {
   width: 100%;
 }
