@@ -294,8 +294,6 @@ export class FilterService {
             }
             return result;
           });
-        } else {
-          console.log("No sorting in group", group, this.options.sort.modelSorts);
         }
 
         if (this.options && this.options.sort && this.options.sort.reverseSort) {
@@ -375,7 +373,9 @@ export class FilterService {
     const currentValues:any = {};
     currentValues.filters = {};
     for (const filterKey of Reflect.ownKeys(this.filters)) {
-      currentValues.filters[filterKey] = Object.assign({},this.filters[filterKey]);
+      if (filterKey !== "__observers__") {
+        currentValues.filters[filterKey] = Object.assign({},this.filters[filterKey]);
+      }
     }
     currentValues.options = {quickShow: this.options.quickShow.splice(0),
       sort: {reverse:this.options.sort.reverse, modelSorts:this.options.sort.modelSorts.splice(0)},
@@ -397,6 +397,15 @@ export class FilterService {
   clearFilters() {
     this.updateWithValues(this.getResetValues());
     this.filterChange();
+  }
+
+  saveValues(name:string, values):void {
+    console.log("Saving values", name, values);
+    localForage.setItem("values_"+name, values);
+  }
+
+  loadValues(name:string): Promise<any> {
+    return localForage.getItem("values_"+name);
   }
 
   private containsText(model) {

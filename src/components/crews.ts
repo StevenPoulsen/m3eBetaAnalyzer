@@ -28,7 +28,7 @@ export class Crews {
       this.crewBuilderService.getCrews().then(crews => {
         this.crews = crews;
       });
-    })
+    });
     this.crewBuilderService.getCrews().then(crews => {
       this.crews = crews;
     });
@@ -67,13 +67,21 @@ export class Crews {
         if (!response.wasCancelled) {
           this.crewBuilderService.deleteCrew(crewName).then(crews => {
             this.crews = crews;
-            this.filterService.filterChange();
+            this.filterService.loadValues("preCrewBuilder").then((values)=>{
+              if (values) {
+                this.filterService.updateWithValues(values);
+              }
+              this.filterService.filterChange();
+            })
           });
         }
     });
   }
 
   createCrew() {
+    if (!this.crewBuilderService.isBuilding) {
+      this.filterService.saveValues("preCrewBuilder", this.filterService.getCurrentValues());
+    }
     this.dialogService.open({viewModel:FactionPrompt, model: {
         factions:this.dataService.getSelectableFactionKeys(),
         skipable: true
@@ -82,14 +90,14 @@ export class Crews {
         if (!response.wasCancelled) {
           faction = response.output;
         }
-      this.menuService.showRightMenu();
-      const filterValues = this.filterService.getResetValues();
-      filterValues.crewLegalOnly = true;
-      filterValues.options.quickShow.push("cost");
-      filterValues.options.sort.modelSorts = ["tax","wyrd"];
-      filterValues.options.modelGroupBy = "type";
-      this.filterService.updateWithValues(filterValues);
-      this.crewBuilderService.newCrew(this.dataService.getFactionDisplayName(faction));
+        this.menuService.showRightMenu();
+        const filterValues = this.filterService.getResetValues();
+        filterValues.crewLegalOnly = true;
+        filterValues.options.quickShow.push("cost");
+        filterValues.options.sort.modelSorts = ["tax","wyrd"];
+        filterValues.options.modelGroupBy = "type";
+        this.filterService.updateWithValues(filterValues);
+        this.crewBuilderService.newCrew(this.dataService.getFactionDisplayName(faction));
     });
   }
 

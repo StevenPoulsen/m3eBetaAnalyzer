@@ -8,6 +8,7 @@ import {Confirm} from "../dialogs/confirm";
 import {AppRouter} from "aurelia-router";
 import * as localForage from 'localforage';
 import {ShareCrew} from "../dialogs/shareCrew";
+import {DataService} from "../services/dataService";
 
 @autoinject()
 export class CrewBuilder {
@@ -20,7 +21,7 @@ export class CrewBuilder {
   private messageType: string;
   private messageShow: string;
 
-  constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator, private filterService: FilterService, private dialogService:DialogService, private router:AppRouter) {
+  constructor(private dataService: DataService, private crewBuilderService: CrewBuilderService, private ea: EventAggregator, private filterService: FilterService, private dialogService:DialogService, private router:AppRouter) {
     const self = this;
     self.updateCrew();
     self.updateRemainingSoulStones();
@@ -64,11 +65,21 @@ export class CrewBuilder {
           no: "Cancel"
         }}).whenClosed(response => {
           if (!response.wasCancelled) {
-            this.crewBuilderService.hideCrewList();
+            this.filterService.loadValues("preCrewBuilder").then(values => {
+              if (values){
+                this.filterService.updateWithValues(values);
+              }
+              this.crewBuilderService.hideCrewList();
+            })
           }
       })
     } else {
-      this.crewBuilderService.hideCrewList();
+      this.filterService.loadValues("preCrewBuilder").then(values => {
+        if (values){
+          this.filterService.updateWithValues(values);
+        }
+        this.crewBuilderService.hideCrewList();
+        });
     }
   }
 

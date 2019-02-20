@@ -1,8 +1,13 @@
 <template>
   <div class="crewModel" >
-    <span hammer-tap.call="editCrewModel()">${model.name}</span> <span class="cost">${model.name === crew.leader ? '★':model.cost}</span><span class="remove" hammer-tap.call="removeModel()"></span>
+    <span>${model.name}</span> <span class="cost">${model.name === crew.leader ? '★':model.cost}</span>
   </div>
   <div class="crewModel upgrade" if.bind="model.upgrade">
-    <span hammer-tap.call="editCrewModel()">${model.upgrade.name}</span> <span class="cost">${model.upgrade.cost}</span><span class="remove" hammer-tap.call="removeUpgrade()"></span>
+    <span>${model.upgrade.name}</span> <span class="cost">${model.upgrade.cost}</span><span class="remove" hammer-tap.call="removeUpgrade()"></span>
+  </div>
+  <div class="crewModel actions">
+    <div hammer-tap.call="showCrewModel()">Show</div>
+    <div hammer-tap.call="editCrewModel()">Edit</div>
+    <div hammer-tap.call="removeModel()" class="remove"></div>
   </div>
 </template>

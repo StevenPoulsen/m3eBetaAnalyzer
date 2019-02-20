@@ -3,19 +3,29 @@ import {FilterService} from "../services/filterService";
 import {SuitValueConverter} from "../converters/suit-value-converter";
 import {ShownService} from "../services/shownService";
 import {CrewBuilderService} from "../services/crewBuilderService";
+import { EventAggregator } from 'aurelia-event-aggregator';
 
 @autoinject()
 export class Model {
   @bindable
   private model: any;
-  private shown: boolean
+  private shown: boolean;
 
   constructor(
     private filterService: FilterService,
     private suitConverter:SuitValueConverter,
     private shownService: ShownService,
+    private ea: EventAggregator,
     private crewBuilderService: CrewBuilderService,
     private element: Element) {
+    ea.subscribe("showModel", (data) => {
+      if (data) {
+        this.shown = data.id === this.model.id;
+        if (this.shown) {
+          this.scrollToThis();
+        }
+      }
+    })
   }
 
   bind() {
@@ -77,12 +87,17 @@ export class Model {
 
   toggle() {
     this.shown = !this.shown;
+    this.scrollToThis();
+    this.shownService.setShown("model", this.model.name, this.shown);
+  }
+
+  scrollToThis() {
     if (this.element.getBoundingClientRect) {
-      if (this.element.getBoundingClientRect().top < window.scrollY) {
+      const boundingRect = this.element.getBoundingClientRect();
+      if (boundingRect.top < window.scrollY || boundingRect.top > window.scrollY + window.innerHeight) {
         this.element.scrollIntoView();
       }
     }
-    this.shownService.setShown("model", this.model.name, this.shown);
   }
 
   addToCrew() {

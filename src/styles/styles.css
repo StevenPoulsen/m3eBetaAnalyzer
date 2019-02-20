@@ -458,6 +458,23 @@ ux-dialog-head {
   color: #666;
 }
 
+.crewModel.actions {
+  display: flex;
+}
+.crewModel.actions div {
+  flex-grow: 1;
+  text-align:center;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+}
+.crewModel.actions div:hover {
+  color: #000;
+}
+.crewModel.actions div.remove:hover {
+  color: #f00;
+}
+
 .listOptions {
   padding: 4px 0;
   border: 1px none #000;
