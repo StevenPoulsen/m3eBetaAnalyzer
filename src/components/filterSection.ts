@@ -15,7 +15,8 @@ export class FilterSection {
   private showFilterModifiers: boolean = false;
   private isFiltering: boolean = false;
 
-  constructor(private filterService:FilterService, private shownService: ShownService, private ea:EventAggregator) {}
+  constructor(private filterService:FilterService, private shownService: ShownService, private ea:EventAggregator) {
+  }
 
   bind() {
     this.show = this.shownService.getShown("filterSection", this.name);
@@ -52,5 +53,4 @@ export class FilterSection {
     this.show = !this.show;
     this.shownService.setShown("filterSection", this.name, this.show);
   }
-
 }

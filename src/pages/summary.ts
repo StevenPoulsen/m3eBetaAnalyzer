@@ -66,6 +66,11 @@ export class Summary {
     this.menuService.toggleRightMenu();
   }
 
+  hideMenus() {
+    this.menuService.hideLeftMenu();
+    this.menuService.hideRightMenu();
+  }
+
   showRemainingSoulStones() {
     if (this.menuService.isRightMenuShown() || !this.crewBuilderService.isBuilding) {
       return;
@@ -79,5 +84,13 @@ export class Summary {
   hideRemaining() {
     clearTimeout(this.showRemainingTimer);
     this.showRemaining = false;
+  }
+
+  menuSwipe($event) {
+    if ($event.direction === 'left') {
+      this.menuService.swipeLeft();
+    } else if ($event.direction === 'right') {
+      this.menuService.swipeRight();
+    }
   }
 }

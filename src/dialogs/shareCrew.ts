@@ -33,7 +33,7 @@ export class ShareCrew {
     const crew = this.crewBuilderService.getCrew();
     let text = crew.faction +", " + crew.soulStones + " SS\n", lineCount = 2;
     text += "Beta version " + crew.versionCode + "\n";
-    for (const type of Reflect.ownKeys(crew.models)) {
+    for (const type of Reflect.ownKeys(this.dataService.typeName)) {
       if (crew.models[type] && crew.models[type].length) {
         text += "[" + this.dataService.getTypeDisplayName(String(type)) + "]\n";
         lineCount++;

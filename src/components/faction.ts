@@ -3,6 +3,9 @@ import {DataService} from "../services/dataService";
 import {ShownService} from "../services/shownService";
 import {TrackingService} from "../services/trackingService";
 import {FilterService} from "../services/filterService";
+import { EventAggregator } from 'aurelia-event-aggregator';
+import {DialogService} from "aurelia-dialog";
+import {Upgrades} from "../dialogs/upgrades";
 
 @autoinject()
 export class Faction {
@@ -14,7 +17,17 @@ export class Faction {
   private name:string;
   private img:string;
 
-  constructor(private dataService: DataService, private shownService: ShownService, private filterService: FilterService){
+  constructor(private dataService: DataService, private shownService: ShownService,
+              private ea: EventAggregator, private filterService: FilterService,
+              private dialogService: DialogService){
+    ea.subscribe("showModelGroup", (data) => {
+      if (data) {
+        this.shown = data.factions.includes(this.faction.name) || this.dataService.getModelType(data) === this.faction.name;
+        if (this.shown) {
+          ea.publish("showModel", data);
+        }
+      }
+    });
   }
 
   bind() {
@@ -44,6 +57,12 @@ export class Faction {
     this.shownService.setShown(this.groupType, this.faction.name, this.shown);
     if (this.shown) {
       TrackingService.event('groupToggle', this.groupType, this.faction.name, null);
+    }
+  }
+
+  showFactionUpgrades() {
+    if (this.groupType === 'faction') {
+      this.dialogService.open({viewModel:Upgrades, model:this.faction.name, lock:false});
     }
   }
 }

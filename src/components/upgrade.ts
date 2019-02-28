@@ -15,7 +15,9 @@ export class Upgrade {
   constructor(private crewBuilderService: CrewBuilderService, private suit: SuitValueConverter) {}
 
   bind() {
-    this.added = this.model.upgrade && this.model.upgrade.name === this.upgrade.name;
+    if (this.model) {
+      this.added = this.model.upgrade && this.model.upgrade.name === this.upgrade.name;
+    }
     this.limitations = this.getLimitations();
   }
 
@@ -32,13 +34,17 @@ export class Upgrade {
   }
 
   addToModel() {
-    this.added= true;
-    this.crewBuilderService.addCrewModelUpgrade(this.model, this.upgrade);
+    if (this.model) {
+      this.added = true;
+      this.crewBuilderService.addCrewModelUpgrade(this.model, this.upgrade);
+    }
   }
 
   removeFromModel() {
-    this.added = false;
-    this.crewBuilderService.removeCrewModelUpgrade(this.model);
+    if (this.model) {
+      this.added = false;
+      this.crewBuilderService.removeCrewModelUpgrade(this.model);
+    }
   }
 
   getText(text):string {

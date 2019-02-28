@@ -2,6 +2,8 @@ import {CrewBuilderService, BuyProblem} from "./crewBuilderService";
 import {autoinject,observable} from "aurelia-framework";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import * as localForage from 'localforage';
+import {DataService} from "./dataService";
+import {FirebaseService} from "./FirebaseService";
 
 @autoinject()
 export class FilterService {
@@ -31,10 +33,15 @@ export class FilterService {
   customTypes:string[] = ["owned","painted","favourites","other"];
   loaded:any = {filters:false,options:false,custom:false};
 
-  constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator) {
+  constructor(private crewBuilderService: CrewBuilderService, private ea: EventAggregator, private dataService: DataService, private firebaseService: FirebaseService) {
     this.loadOptions();
     this.loadFilters();
     this.loadCustom();
+    ea.subscribe("userDataChanged", userData => {
+      if (userData && userData.custom) {
+        this.setCustom(userData.custom);
+      }
+    })
   }
 
   private loadComplete(name:string) {
@@ -51,6 +58,7 @@ export class FilterService {
     if (this.filterChangeFunction) {
       this.filterChangeFunction();
     }
+
     this.saveFilters();
     this.saveOptions();
   }
@@ -119,100 +127,150 @@ export class FilterService {
           if (model.factions && this.crewBuilderService.isBuilding && !this.crewBuilderService.hasLeader() && !model.factions.includes(this.crewBuilderService.getCrew().faction)) {
             continue;
           }
-          if ((this.filters.custom.owned && this.custom.owned.indexOf(model.name) > -1)
+
+          const isCrewModel = this.crewBuilderService.hasCrewModel(model.id);
+          let isFiltered:boolean = false;
+
+          const customFilterCheck: boolean = ((this.filters.custom.owned && this.custom.owned.indexOf(model.name) > -1)
             || (this.filters.custom.painted && this.custom.painted.indexOf(model.name) > -1)
             || (this.filters.custom.favourites && this.custom.favourites.indexOf(model.name) > -1)
-            || (this.filters.custom.other && this.custom.owned.indexOf(model.name) + this.custom.painted.indexOf(model.name) + this.custom.favourites.indexOf(model.name) ===-3 )) {
+            || (this.filters.custom.other && this.custom.owned.indexOf(model.name) + this.custom.painted.indexOf(model.name) + this.custom.favourites.indexOf(model.name) ===-3 ));
+          isFiltered = !customFilterCheck;
+          if (customFilterCheck || isCrewModel) {
 
-            let primaryFaction = model.factions[0];
-            factions[primaryFaction] = true;
-            filterFaction[primaryFaction] = filterFaction[primaryFaction] !== false;
-            let secondaryFaction = null;
-            if (model.factions.length === 2) {
-              secondaryFaction = model.factions[1];
-              factions[secondaryFaction] = true;
-              filterFaction[secondaryFaction] = filterFaction[secondaryFaction] !== false;
+            if (!isFiltered) {
+              let primaryFaction = model.factions[0];
+              factions[primaryFaction] = true;
+              filterFaction[primaryFaction] = filterFaction[primaryFaction] !== false;
+              let secondaryFaction = null;
+              if (model.factions.length === 2) {
+                secondaryFaction = model.factions[1];
+                factions[secondaryFaction] = true;
+                filterFaction[secondaryFaction] = filterFaction[secondaryFaction] !== false;
+              }
             }
 
-            if (!FilterService.isFiltered(model.factions, filterFaction)) {
-              let modelCharacteristics = model.charactaristics;
-              for (let typeIndex = 0, typeLength = modelCharacteristics.length, type; typeIndex < typeLength; typeIndex++) {
-                type = modelCharacteristics[typeIndex];
-                types[type] = true;
-                filterTypes[type] = filterTypes[type] !== false;
-              }
-              if (!FilterService.isFiltered(modelCharacteristics, filterTypes)) {
-                let modelKeywords = model.keywords;
-                if (modelKeywords) {
-                  if (this.crewBuilderService.isBuilding && model.crewKeywords) {
-                    modelKeywords = modelKeywords.concat(model.crewKeywords);
-                  }
-                  for (let keywordIndex = 0, keywordLength = modelKeywords.length, keyword; keywordIndex < keywordLength; keywordIndex++) {
-                    keyword = modelKeywords[keywordIndex];
-                    keywords[keyword] = true;
-                    filterKeywords[keyword] = filterKeywords[keyword] !== false;
-                  }
-                } else {
-                  keywords['None'] = true;
-                  filterKeywords['None'] = filterKeywords['None'] !== false;
+            const factionFilterCheck = !isFiltered && !FilterService.isFiltered(model.factions, filterFaction);
+            isFiltered = !factionFilterCheck;
+
+            let modelCharacteristics = model.charactaristics;
+            if (factionFilterCheck || isCrewModel) {
+              if (!isFiltered) {
+                for (let typeIndex = 0, typeLength = modelCharacteristics.length, type; typeIndex < typeLength; typeIndex++) {
+                  type = modelCharacteristics[typeIndex];
+                  types[type] = true;
+                  filterTypes[type] = filterTypes[type] !== false;
                 }
-                if (!FilterService.isFiltered(modelKeywords, filterKeywords)
-                  || (!modelKeywords && filterKeywords['None'] !== false)) {
-                  let modelRules = model.rules;
-                  for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++) {
-                    rule = modelRules[ruleIndex];
-                    rules[rule.name] = true;
-                    filterRules[rule.name] = filterRules[rule.name] !== false;
+              }
+
+              const characteristicsFilterCheck = !isFiltered && !FilterService.isFiltered(modelCharacteristics, filterTypes);
+              isFiltered = !characteristicsFilterCheck;
+
+              if (characteristicsFilterCheck || isCrewModel) {
+                let modelKeywords = model.keywords;
+                if (!isFiltered) {
+                  if (modelKeywords) {
+                    if (this.crewBuilderService.isBuilding && model.crewKeywords) {
+                      modelKeywords = modelKeywords.concat(model.crewKeywords);
+                    }
+                    for (let keywordIndex = 0, keywordLength = modelKeywords.length, keyword; keywordIndex < keywordLength; keywordIndex++) {
+                      keyword = modelKeywords[keywordIndex];
+                      keywords[keyword] = true;
+                      filterKeywords[keyword] = filterKeywords[keyword] !== false;
+                    }
+                  } else {
+                    keywords['None'] = true;
+                    filterKeywords['None'] = filterKeywords['None'] !== false;
                   }
-                  if (!FilterService.isFiltered(modelRules, filterRules)) {
+                }
+
+                const keywordFilterCheck = !isFiltered && (!FilterService.isFiltered(modelKeywords, filterKeywords)|| (!modelKeywords && filterKeywords['None'] !== false));
+                isFiltered = !keywordFilterCheck;
+
+                if (keywordFilterCheck || isCrewModel) {
+                  let modelRules = model.rules;
+
+                  if (!isFiltered) {
+                    for (let ruleIndex = 0, ruleLength = modelRules.length, rule; ruleIndex < ruleLength; ruleIndex++) {
+                      rule = modelRules[ruleIndex];
+                      rules[rule.name] = true;
+                      filterRules[rule.name] = filterRules[rule.name] !== false;
+                    }
+                  }
+
+                  const ruleFilterCheck = !isFiltered && !FilterService.isFiltered(modelRules, filterRules);
+                  isFiltered = !ruleFilterCheck;
+
+                  if (ruleFilterCheck || isCrewModel) {
                     let modelAttacks = model.attacks;
-                    if (modelAttacks && modelAttacks.length) {
-                      for (let attackIndex = 0, attackLength = modelAttacks.length, attack; attackIndex < attackLength; attackIndex++) {
-                        attack = modelAttacks[attackIndex];
-                        attacks[attack.name] = true;
-                        filterAttacks[attack.name] = filterAttacks[attack.name] !== false;
+
+                    if (!isFiltered) {
+                      if (modelAttacks && modelAttacks.length) {
+                        for (let attackIndex = 0, attackLength = modelAttacks.length, attack; attackIndex < attackLength; attackIndex++) {
+                          attack = modelAttacks[attackIndex];
+                          attacks[attack.name] = true;
+                          filterAttacks[attack.name] = filterAttacks[attack.name] !== false;
+                        }
+                      } else {
+                        attacks['None'] = true;
+                        filterAttacks['None'] = filterAttacks['None'] !== false;
                       }
-                    } else {
-                      attacks['None'] = true;
-                      filterAttacks['None'] = filterAttacks['None'] !== false;
                     }
+
                     let modelTacticals = model.tacticals;
-                    if (modelTacticals && modelTacticals.length) {
-                      for (let tacticalIndex = 0, tacticalLength = modelTacticals.length, tactical; tacticalIndex < tacticalLength; tacticalIndex++) {
-                        tactical = modelTacticals[tacticalIndex];
-                        tacticals[tactical.name] = true;
-                        filterTacticals[tactical.name] = filterTacticals[tactical.name] !== false;
+                    if (!isFiltered) {
+                      if (modelTacticals && modelTacticals.length) {
+                        for (let tacticalIndex = 0, tacticalLength = modelTacticals.length, tactical; tacticalIndex < tacticalLength; tacticalIndex++) {
+                          tactical = modelTacticals[tacticalIndex];
+                          tacticals[tactical.name] = true;
+                          filterTacticals[tactical.name] = filterTacticals[tactical.name] !== false;
+                        }
+                      } else {
+                        tacticals['None'] = true;
+                        filterTacticals['None'] = filterTacticals['None'] !== false;
                       }
-                    } else {
-                      tacticals['None'] = true;
-                      filterTacticals['None'] = filterTacticals['None'] !== false;
                     }
-                    if (!FilterService.isFiltered(modelAttacks, filterAttacks)
-                      || ((!modelAttacks || !modelAttacks.length) && filterAttacks['None'] !== false)) {
-                      if (!FilterService.isFiltered(modelTacticals, filterTacticals)
-                        || ((!modelTacticals || !modelTacticals.length) && filterTacticals['None'] !== false)) {
+
+                    const attackFilterCheck  = !isFiltered && (!FilterService.isFiltered(modelAttacks, filterAttacks)|| ((!modelAttacks || !modelAttacks.length) && filterAttacks['None'] !== false));
+                    isFiltered = !attackFilterCheck;
+                    if (attackFilterCheck || isCrewModel) {
+
+                      const tacticalFilterCheck = !isFiltered && (!FilterService.isFiltered(modelTacticals, filterTacticals)
+                        || ((!modelTacticals || !modelTacticals.length) && filterTacticals['None'] !== false));
+                      isFiltered = !tacticalFilterCheck;
+
+                      if (tacticalFilterCheck || isCrewModel) {
                         let modelStats = model.stats, modelStat, outOfStatRange = false;
-                        for (const statKey of this.stats) {
-                          modelStat = +modelStats[statKey].value;
-                          this.statsRanged[statKey] = {
-                            min: 0,
-                            max: Math.max(+this.statsRanged[statKey].max, +modelStat)
-                          };
-                          if ((filterStats[statKey] && filterStats[statKey].min && +modelStat < +filterStats[statKey].min)
-                            || (filterStats[statKey] && filterStats[statKey].max && +modelStat > +filterStats[statKey].max)) {
-                            outOfStatRange = true;
-                            this.missing(statKey, model);
+                        if (!isFiltered) {
+                          for (const statKey of this.stats) {
+                            modelStat = +modelStats[statKey].value;
+                            this.statsRanged[statKey] = {
+                              min: 0,
+                              max: Math.max(+this.statsRanged[statKey].max, +modelStat)
+                            };
+                            if ((filterStats[statKey] && filterStats[statKey].min && +modelStat < +filterStats[statKey].min)
+                              || (filterStats[statKey] && filterStats[statKey].max && +modelStat > +filterStats[statKey].max)) {
+                              outOfStatRange = true;
+                              isFiltered = true;
+                              this.missing(statKey, model);
+                            }
                           }
                         }
-                        if (!outOfStatRange) {
-                          if ((!this.freeText || this.containsText(model))) {
+                        
+                        if (!outOfStatRange || isCrewModel) {
+                          const freeTextFilterCheck = !isFiltered &&(!this.freeText || this.containsText(model));
+                          isFiltered = !freeTextFilterCheck;
+                          if (freeTextFilterCheck || isCrewModel) {
                             if (this.crewBuilderService.isBuilding) {
                               model.tax = this.crewBuilderService.calculateModelTax(model);
                               let buyProblem: BuyProblem = this.crewBuilderService.buyProblem(model);
-                              if (this.crewBuilderService.isBuilding &&
+                              const crewFilterCheck = !isFiltered && (this.crewBuilderService.isBuilding &&
                                 (!this.crewLegalOnly || !buyProblem.hide) &&
-                                (!this.taxFreeOnly || model.tax <= 0)) {
-                                model.problem = this.crewLegalOnly ? buyProblem.name : '';
+                                (!this.taxFreeOnly || model.tax <= 0));
+                              isFiltered = !crewFilterCheck;
+
+                              if (crewFilterCheck || isCrewModel) {
+                                model.problem = isFiltered ? 'filtered' : (this.crewLegalOnly ? buyProblem.name : '');
                                 this.addModelToList(filteredData.factions, faction, model);
                               } else {
                                 isFiltering["crewBuilder"] = true;
@@ -339,11 +397,11 @@ export class FilterService {
       case "type":
         if (!list["master"]) {
           list["master"] = {name:"master", models:[]};
-          list["enforcer"] = {name:"enforcer", models:[]};
           list["henchman"] = {name:"henchman", models:[]};
+          list["enforcer"] = {name:"enforcer", models:[]};
           list["minion"] = {name:"minion", models:[]};
         }
-        groupKey = this.crewBuilderService.getModelType(model);
+        groupKey = this.dataService.getModelType(model);
         break;
       case "none":
         groupKey = "All";
@@ -365,7 +423,7 @@ export class FilterService {
     resetValues.options = {quickShow: [], sort: {reverse:false, modelSorts:[this.sortValues[0]]}, modelGroupBy: "faction"};
     resetValues.crewLegalOnly = false;
     resetValues.taxFreeOnly = false;
-    resetValues.freeText = "";
+    resetValues.freeText = undefined;
     return resetValues;
   }
 
@@ -374,11 +432,13 @@ export class FilterService {
     currentValues.filters = {};
     for (const filterKey of Reflect.ownKeys(this.filters)) {
       if (filterKey !== "__observers__") {
-        currentValues.filters[filterKey] = Object.assign({},this.filters[filterKey]);
+        let filters = Object.assign({},this.filters[filterKey]);
+        Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
+        currentValues.filters[filterKey] = filters;
       }
     }
-    currentValues.options = {quickShow: this.options.quickShow.splice(0),
-      sort: {reverse:this.options.sort.reverse, modelSorts:this.options.sort.modelSorts.splice(0)},
+    currentValues.options = {quickShow: this.options.quickShow.slice(0),
+      sort: {reverse:!!this.options.sort.reverse, modelSorts:this.options.sort.modelSorts?this.options.sort.modelSorts.slice(0): [this.sortValues[0]]},
       modelGroupBy: this.options.modelGroupBy};
     currentValues.crewLegalOnly = this.crewLegalOnly;
     currentValues.taxFreeOnly = this.taxFreeOnly;
@@ -400,7 +460,6 @@ export class FilterService {
   }
 
   saveValues(name:string, values):void {
-    console.log("Saving values", name, values);
     localForage.setItem("values_"+name, values);
   }
 
@@ -511,8 +570,8 @@ export class FilterService {
     });
   }
 
-  private saveFilters() {
-    localForage.setItem("filters", this.filters);
+  private saveFilters():Promise<any> {
+    return localForage.setItem("filters", this.getCurrentValues().filters);
   }
 
   private loadOptions() {
@@ -527,12 +586,17 @@ export class FilterService {
     });
   }
 
-  private saveOptions() {
-    localForage.setItem("options", this.options);
+  private saveOptions():Promise<any> {
+    return localForage.setItem("options", this.getCurrentValues().options);
   }
 
-  private saveCustom() {
-    localForage.setItem("custom", this.custom);
+  private saveCustom():Promise<any> {
+    const customCopy = Object.assign({},this.custom);
+    customCopy.saveTime = new Date().getTime();
+    if (this.firebaseService.isSignedIn()) {
+      this.firebaseService.storeUserData("custom", customCopy);
+    }
+    return localForage.setItem("custom", customCopy);
   }
 
   private loadCustom() {
@@ -542,5 +606,11 @@ export class FilterService {
       }
       this.loadComplete("custom");
     });
+  }
+
+  private setCustom(custom) {
+    if (custom && (!this.custom.saveTime || custom.saveTime > this.custom.saveTime)) {
+      this.custom = custom;
+    }
   }
 }

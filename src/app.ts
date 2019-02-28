@@ -40,6 +40,9 @@ export class App {
   }
 
   menuSwipe($event) {
+    if (this.menuService.isRightMenuShown() || this.menuService.isLeftMenuShown()) {
+      return;
+    }
     if ($event.direction === 'left') {
       this.menuService.swipeLeft();
     } else if ($event.direction === 'right') {

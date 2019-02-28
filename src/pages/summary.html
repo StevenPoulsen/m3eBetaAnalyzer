@@ -8,12 +8,16 @@
   <require from="../components/install"></require>
   <require from="../components/crewBuilder"></require>
   <require from="../components/crews"></require>
+  <require from="../components/account"></require>
+  <require from="../components/setups"></require>
 
-  <div class="menus ${leftMenuShown?'shown':''}">
+  <div class="menus ${leftMenuShown?'shown':''}" hammer-swipe.call="menuSwipe($event)">
     <version></version>
     <filter></filter>
     <sort></sort>
+    <setups></setups>
     <crews></crews>
+    <account></account>
     <install></install>
   </div>
   <div>
@@ -21,14 +25,16 @@
       <model repeat.for="model of data.factions[faction].models" model.bind="model"></model>
     </faction>
   </div>
-  <div>Portions of the materials used are copyrighted works of Wyrd Miniatures, LLC, in the United States of
+  <p>Portions of the materials used are copyrighted works of Wyrd Miniatures, LLC, in the United States of
     America and elsewhere. All rights reserved, Wyrd Miniatures, LLC. This material is not official and is not
-    endorsed by Wyrd Miniatures, LLC.</div>
-  <div class="menus right ${rightMenuShown?'shown':''}" if.bind="crewBuilderService.isBuilding">
+    endorsed by Wyrd Miniatures, LLC.</p>
+  <div class="menus right ${rightMenuShown?'shown':''}" if.bind="crewBuilderService.isBuilding" hammer-swipe.call="menuSwipe($event)">
     <crew-builder></crew-builder>
   </div>
   <div class="mobileMenuToggler leftMenuToggler" hammer-tap.call="toggleLeftMenu()">Menus</div>
   <div class="mobileMenuToggler rightMenuToggler" hammer-tap.call="toggleRightMenu()" if.bind="crewBuilderService.isBuilding">Crew</div>
   <div class="remainingSoulStonesSummary ${showRemaining?'shown':''}">${remaining}/${crewBuilderService.currentCrew.soulStones}</div>
-  <div clsas="appVersion">App Version: ${dataService.getAppVersion()}</div>
+  <p clsas="appVersion">App Version: ${dataService.getAppVersion()}</p>
+  <p>If you want to contact us for any reason; please use our Facebook page: <a href="https://www.facebook.com/m3eBetaAnalyzer" target="_blank">https://www.facebook.com/m3eBetaAnalyzer/</a>. Thanks!</p>
+  <div class="menuBackground ${leftMenuShown || rightMenuShown ? 'shown':''}" hammer-tap.call="hideMenus()"></div>
 </template>

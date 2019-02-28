@@ -7,9 +7,16 @@ interface VersionDataEntry {
   factions: any,
   appVersion: string
 }
+export enum Type {
+  Master = "master",
+  Henchman = "henchman",
+  Enforcer = "enforcer",
+  Minion = "minion",
+  Other = "other"
+}
 
 export class DataService {
-  private appVersion: string = "0.9";
+  private appVersion: string = "0.11";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
@@ -30,7 +37,7 @@ export class DataService {
     "Ten Thunders": "tt",
     "Dead Man's Hand": "dmh"
   };
-  private typeName = {
+  public typeName = {
     'master': "Masters",
     'henchman': 'Henchmen',
     'enforcer': 'Enforcers',
@@ -42,6 +49,24 @@ export class DataService {
 
   constructor() {
     this.setVersion(this.getLatestVersionCode()).then(data=>{this.data=data;});
+  }
+
+  public getModelType(model): Type {
+    if (model.charactaristics) {
+      for (const char of model.charactaristics) {
+        switch (char.toLowerCase()) {
+          case "master":
+            return Type.Master;
+          case "henchman":
+            return Type.Henchman;
+          case "enforcer":
+            return Type.Enforcer;
+          case "minion":
+            return Type.Minion;
+        }
+      }
+    }
+    return Type.Other;
   }
 
   public setVersion(version:string):Promise<VersionDataEntry> {

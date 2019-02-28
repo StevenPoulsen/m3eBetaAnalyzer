@@ -1,6 +1,6 @@
 <template>
   <div class="installMenu ${show?'shown':''}">
-    <div class="headline">Install</div>
+    <div class="headline">Install<span class="help" hammer-tap.call="helpService.showHelp('install')"></span></div>
     <div hammer-tap.call="install()" class="button">Install this app</div>
   </div>
 </template>

@@ -1,0 +1,11 @@
+<template>
+  <ux-dialog class="dialog">
+    <ux-dialog-head>
+      ${headline}
+    </ux-dialog-head>
+    <ux-dialog-body>
+      <p class="helpText" repeat.for="text of texts">${text}</p>
+      <div class="button" hammer-tap.call="close()">Close</div>
+    </ux-dialog-body>
+  </ux-dialog>
+</template>

@@ -8,13 +8,18 @@
   },
   "license": "MIT",
   "dependencies": {
+    "acorn": "^6.1.0",
     "aurelia-animator-css": "^1.0.4",
     "aurelia-bootstrapper": "^2.3.2",
     "aurelia-dialog": "^2.0.0-rc.5",
     "aurelia-fetch-client": "^1.8.0",
     "aurelia-hammer": "github:benib/aurelia-hammer",
     "aurelia-polyfills": "^1.3.3",
+    "babel-eslint": "^7.2.3",
     "bluebird": "^3.5.2",
+    "eslint": "^4.0.0",
+    "firebase": "^5.8.4",
+    "firebaseui": "^3.5.2",
     "hammerjs": "^2.0.8",
     "localforage": "^1.7.3",
     "workbox-webpack-plugin": "^3.6.3"

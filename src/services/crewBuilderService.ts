@@ -1,19 +1,13 @@
 import {autoinject, computedFrom} from 'aurelia-framework';
-import {DataService} from "./dataService";
+import {DataService, Type} from "./dataService";
 import {MenuService} from "./menuService";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {DialogService} from 'aurelia-dialog';
 import {FactionPrompt} from "../dialogs/factionPrompt";
 import {Confirm} from "../dialogs/confirm";
 import * as localForage from 'localforage';
+import {FirebaseService} from "./FirebaseService";
 
-enum Type {
-  Master = "master",
-  Henchman = "henchman",
-  Enforcer = "enforcer",
-  Minion = "minion",
-  Other = "other"
-}
 
 interface CrewModel {
   id: number;
@@ -31,7 +25,7 @@ export class CrewBuilderService {
   private currentCrew: any;
   private lastModified: number;
 
-  constructor(private dataService: DataService, private menuService: MenuService, private ea: EventAggregator, private dialogService: DialogService) {
+  constructor(private dataService: DataService, private menuService: MenuService, private ea: EventAggregator, private dialogService: DialogService, private firebaseService:FirebaseService) {
     localForage.getItem("printCrew").then(value => {
       if (value) {
         this.currentCrew = value;
@@ -100,7 +94,7 @@ export class CrewBuilderService {
   }
 
   public addModel(model) {
-    const type = this.getModelType(model);
+    const type = this.dataService.getModelType(model);
     if (!this.currentCrew.leader) {
       if (type === Type.Master || type === Type.Henchman) {
         this.setLeader(model);
@@ -224,6 +218,10 @@ export class CrewBuilderService {
     return null;
   }
 
+  hasCrewModel(id) {
+    return this.getCurrentCrewModel(id) !== null;
+  }
+
   private extractCrewModel(model): CrewModel {
     return {name: model.name, cost: this.calculateModelCost(model), id: model.id};
   }
@@ -243,7 +241,7 @@ export class CrewBuilderService {
         }
       }
     }
-    this.currentCrew.leaderType = this.getModelType(model);
+    this.currentCrew.leaderType = this.dataService.getModelType(model);
     if (!this.currentCrew.faction || !model.factions.includes(this.currentCrew.faction)) {
       if (model.factions.length > 1 && model.factions[1] !== "Dead Man's Hand") {
         this.dialogService.open({
@@ -263,24 +261,6 @@ export class CrewBuilderService {
       }
     }
 
-  }
-
-  public getModelType(model): Type {
-    if (model.charactaristics) {
-      for (const char of model.charactaristics) {
-        switch (char.toLowerCase()) {
-          case "master":
-            return Type.Master;
-          case "henchman":
-            return Type.Henchman;
-          case "enforcer":
-            return Type.Enforcer;
-          case "minion":
-            return Type.Minion;
-        }
-      }
-    }
-    return Type.Other;
   }
 
   public calculateModelCost(model): number {
@@ -322,7 +302,7 @@ export class CrewBuilderService {
   }
 
   public buyProblem(model): BuyProblem {
-    const type = this.getModelType(model);
+    const type = this.dataService.getModelType(model);
     let reply: BuyProblem = null;
     if (!this.currentCrew) {
       return {hide: false, name: ""};
@@ -419,16 +399,23 @@ export class CrewBuilderService {
     return this.currentCrew;
   }
 
-  public getCrews(): Promise<any> {
-    return localForage.getItem(this.cacheKey()).then(value => {
-      return new Promise<any>(((resolve, reject) => {
-        if (value) {
-          resolve(value);
-        } else {
-          resolve([]);
-        }
-      }));
-    });
+  public getCrews(fromUserData:boolean = false): Promise<any> {
+    if (fromUserData) {
+      return new Promise(resolve => {
+        resolve(this.firebaseService.getUserData(this.cacheKey()));
+      });
+    }
+    return localForage.getItem(this.cacheKey()).then(this.handleGetCrewsResult);
+  }
+
+  private handleGetCrewsResult(value):Promise<any> {
+    return new Promise<any>(((resolve, reject) => {
+      if (value) {
+        resolve(value);
+      } else {
+        resolve([]);
+      }
+    }));
   }
 
   public saveCrew(saveName: string): void {
@@ -448,9 +435,16 @@ export class CrewBuilderService {
       if (!replace) {
         crews.push(this.currentCrew);
       }
-      localForage.setItem(this.cacheKey(), crews).then(() => {
+      this.saveCrews(crews);
+    });
+  }
+
+  public saveCrews(crews, publish:boolean = true): void {
+    this.firebaseService.storeUserData(this.cacheKey(), crews);
+    localForage.setItem(this.cacheKey(), crews).then(() => {
+      if (publish) {
         this.ea.publish("crewSave");
-      });
+      }
     });
   }
 

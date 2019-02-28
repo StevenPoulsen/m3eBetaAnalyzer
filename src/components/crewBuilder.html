@@ -7,7 +7,7 @@
       <label class="soulStones">SS: <span>${remaining}</span>/<input type="number" value.bind="crewBuilderService.currentCrew.soulStones" /></label>
     </div>
     <div class="crewModels">
-      <div class="section ${type}" repeat.for="type of crew.models | keys" if.bind="crew.models[type].length">
+      <div class="section ${type}" repeat.for="type of dataService.typeName | keys" if.bind="crew.models[type].length">
         <div class="crewModelType">${dataService.getTypeDisplayName(type)}</div>
         <crew-model repeat.for="model of crew.models[type]" model.bind="model"></crew-model>
       </div>

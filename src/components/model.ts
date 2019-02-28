@@ -22,7 +22,8 @@ export class Model {
       if (data) {
         this.shown = data.id === this.model.id;
         if (this.shown) {
-          this.scrollToThis();
+          const self = this;
+          setTimeout(()=>Model.scrollToElement(self.element),10);
         }
       }
     })
@@ -39,7 +40,7 @@ export class Model {
       case "types":
         return this.model.charactaristics.join(", ");
       case "keywords":
-        return this.model.keywords.join(", ");
+        return this.model.keywords ? this.model.keywords.join(", ") : "";
       case "cost":
         return "Cost: " + this.model.stats.cost.value + (this.model.tax ? (this.model.tax > 0 ? '+' : '') + this.model.tax : '' );
       case "mv":
@@ -87,15 +88,15 @@ export class Model {
 
   toggle() {
     this.shown = !this.shown;
-    this.scrollToThis();
+    Model.scrollToElement(this.element);
     this.shownService.setShown("model", this.model.name, this.shown);
   }
 
-  scrollToThis() {
-    if (this.element.getBoundingClientRect) {
-      const boundingRect = this.element.getBoundingClientRect();
+  static scrollToElement(element:Element) {
+    if (element.getBoundingClientRect) {
+      const boundingRect = element.getBoundingClientRect();
       if (boundingRect.top < window.scrollY || boundingRect.top > window.scrollY + window.innerHeight) {
-        this.element.scrollIntoView();
+        element.scrollIntoView();
       }
     }
   }

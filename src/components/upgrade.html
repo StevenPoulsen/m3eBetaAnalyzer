@@ -8,7 +8,7 @@
         <span class="name">${upgrade.name}</span>
         <span class="quickShow">Cost: ${upgrade.cost}</span>
       </div>
-      <div hammer-tap.call="toggleForModel()">
+      <div hammer-tap.call="toggleForModel()" if.bind="!!model">
         <span class="addToCrew" if.bind="!added && !model.upgrade">+</span>
         <span class="addToCrew" if.bind="added">-</span>
       </div>

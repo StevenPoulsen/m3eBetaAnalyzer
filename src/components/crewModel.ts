@@ -3,6 +3,7 @@ import {CrewBuilderService} from "../services/crewBuilderService";
 import {DialogService} from "aurelia-dialog";
 import {EditModel} from "../dialogs/editModel";
 import { EventAggregator } from 'aurelia-event-aggregator';
+import {DataService} from "../services/dataService";
 
 @autoinject()
 export class CrewModel {
@@ -10,7 +11,7 @@ export class CrewModel {
   private model;
   private crew;
 
-  constructor(private crewBuilderService:CrewBuilderService, private dialogService:DialogService, private ea: EventAggregator) {}
+  constructor(private crewBuilderService:CrewBuilderService, private dialogService:DialogService, private ea: EventAggregator, private dataService: DataService) {}
 
   bind() {
     this.crew = this.crewBuilderService.getCrew();
@@ -33,6 +34,8 @@ export class CrewModel {
   }
 
   showCrewModel() {
-    this.ea.publish("showModel", this.model);
+    this.dataService.getModelById(this.model.id).then(model => {
+      this.ea.publish("showModelGroup", model);
+    });
   }
 }

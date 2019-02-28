@@ -37,6 +37,35 @@ ul li {
   cursor: pointer;
 }
 
+.help {
+  position: absolute;
+  right:0;
+  top: 50%;
+  margin-top: -10px;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 100%;
+  width:14px;
+  height: 14px;
+  cursor:pointer;
+}
+.help:before {
+  content:'?';
+  line-height: 14px;
+  font-size: 8px;
+  font-weight:bold;
+  text-align:center;
+  display:block;
+  position: absolute;
+  left:1px;
+  right:0;
+  top:0;
+}
+.helpText {
+  margin: 0 0 8px;
+  line-height: 1.1em;
+}
+
 .message {
   position: absolute;
   bottom: 50px;
@@ -127,7 +156,11 @@ ul li {
   z-index: 10;
   margin: 0 0 50px -600px;
   max-height: 100vh;
+  overflow: -moz-scrollbars-none;
   overflow-y: auto;
+}
+.menus::-webkit-scrollbar {
+  display:none;
 }
 .menus.shown {
   transform: translate3d(200px,0,0);
@@ -137,10 +170,10 @@ ul li {
   padding: 0 0 50px 0;
 }
 .menus.right.shown {
-  transform: translate3d(-200px,0,0);
+  transform: translate3d(-300px,0,0);
 }
 
-.filterMenu, .sortMenu, .installMenu, .crewsMenu, .crewBuilder {
+.filterMenu, .sortMenu, .installMenu, .crewsMenu, .crewBuilder, .accountMenu, .setupsMenu {
   border: 2px solid #000;
   border-radius: 10px;
   padding: 10px;
@@ -194,6 +227,7 @@ ul li {
 .headline {
   font-weight: bold;
   text-align: center;
+  position: relative;
 }
 .faction {
   position: relative;
@@ -216,15 +250,19 @@ ul li {
 .faction.resser:before {background: linear-gradient(to right, rgba(84,163,71,0.5) 0,rgba(84,163,71,0) 100%); }
 .faction.tt:before {background: linear-gradient(to right, rgba(235,155,8,0.5) 0,rgba(235,155,8,0) 100%); }
 
-.factionTitle {
-  font-weight: bold;
+.groupTitleWrapper {
   border: solid #000 2px;
   padding: 2px 4px;
   display: flex;
   background: #eee;
+  font-weight: bold;
 }
-.faction .factionTitle {
+.faction .groupTitleWrapper {
   background: none transparent;
+}
+.factionTitle {
+  display:flex;
+  flex-grow:1;
 }
 .factionTitle img {
   width: 40px;
@@ -246,6 +284,12 @@ ul li {
   width: 116px;
   height: 116px;
   margin: 10px;
+}
+
+.faction .factionUpgrades {
+  height: 16px;
+  line-height: 16px;
+  font-size: 12px;
 }
 
 ux-dialog-head {
@@ -430,12 +474,12 @@ ux-dialog-head {
   display: none;
 }
 
-.crew {
+.crew, .setup {
   display: flex;
   margin: 4px 0;
 }
 
-.crew .crewName {
+.crew .crewName, .setup .setupName {
   flex-grow:1;
   cursor: pointer;
 }
@@ -464,6 +508,7 @@ ux-dialog-head {
 
 .crewModel.actions {
   display: flex;
+  margin: 0;
 }
 .crewModel.actions div {
   flex-grow: 1;
@@ -471,6 +516,8 @@ ux-dialog-head {
   color: #999;
   font-size: 12px;
   cursor: pointer;
+  line-height: 20px;
+  margin: -4px 0 0 0;
 }
 .crewModel.actions div:hover {
   color: #000;
@@ -554,6 +601,10 @@ ux-dialog-head {
 .shareBody textarea {
   width: 100%;
 }
+p {
+  margin: 4px;
+  line-height: 1.1em;
+}
 
 @media only screen and (max-width: 800px) {
   .mobileMenuToggler {
@@ -581,13 +632,28 @@ ux-dialog-head {
   .model .details .factions {
     position: static;
   }
+  .menuBackground {
+    position:fixed;
+    left:0;
+    right:0;
+    top:0;
+    background: rgba(0,0,0,.25) none;
+    opacity: 0;
+    z-index: 9;
+  }
+  .menuBackground.shown {
+    bottom:0;
+    opacity: 1;
+    transition:opacity 200ms;
+  }
   .menus {
     left: -200px;
     margin: 0 0 50px;
   }
   .menus.right {
     left: auto;
-    right: -200px;
+    right: -300px;
+    width: 300px;
   }
   .menus:after {
     display: block;
@@ -611,5 +677,17 @@ ux-dialog-head {
   }
   .remainingSoulStonesSummary.shown {
     transform: translate3d(0, 30px, 0);
+  }
+  .quickLine {
+    line-height: 24px;
+  }
+  .addToCrew {
+    font-size: 24px;
+  }
+  .message {
+    bottom: 100px;
+    background: #fff none;
+    margin: 0 4px;
+    border-radius: 10px;
   }
 }

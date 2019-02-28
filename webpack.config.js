@@ -174,7 +174,8 @@ module.exports = ({ production, server, extractCss, coverage, analyze, karma } =
     new CopyWebpackPlugin([
       {from:'data',to:'data'},
       {from:'pwa',to:'pwa'},
-      {from:'favicon.ico',to:'favicon.ico'}
+      {from:'favicon.ico',to:'favicon.ico'},
+      {from:'privacy_and_terms.html', to:'privacy_and_terms.html'}
     ]),                                                            
     // ref: https://webpack.js.org/plugins/mini-css-extract-plugin/
     ...when(extractCss, new MiniCssExtractPlugin({ // updated to match the naming conventions for the js files

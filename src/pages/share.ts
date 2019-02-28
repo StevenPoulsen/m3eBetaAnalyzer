@@ -21,7 +21,6 @@ export class Share {
 
   private readSharedCrew(sharedCrew) {
     this.crewBuilderService.setCrewFromShare(sharedCrew).then(()=>{
-      console.log("read share", sharedCrew, this.crewBuilderService.getCrew());
       this.goToSummary();
     });
   }

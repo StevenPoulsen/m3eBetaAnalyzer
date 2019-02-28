@@ -1,0 +1,12 @@
+<template>
+  <div class="setupsMenu">
+    <div class="headline">Setups<span class="help" hammer-tap.call="helpService.showHelp('setups')"></span></div>
+    <div class="setup" repeat.for="setup of storedValueSetupNames">
+      <span class="setupName" hammer-tap.call="loadValueSetup(setup)">${setup}</span><span class="remove" hammer-tap.call="deleteValueSetup(setup)"></span>
+    </div>
+    <div class="inputWrapper">
+      <label><input type="text" name="setupName" class="${invalidSetupName?'invalid':''}" placeholder="Setup save name" value.bind="valueSetupName" /></label>
+    </div>
+    <div hammer-tap.call="saveValueSetup()" class="button">Save setup</div>
+  </div>
+</template>
