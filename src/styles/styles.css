@@ -66,6 +66,10 @@ ul li {
   line-height: 1.1em;
 }
 
+.ux-dialog-overlay {
+  background: rgba(0,0,0,.25) none;
+}
+
 .message {
   position: absolute;
   bottom: 50px;

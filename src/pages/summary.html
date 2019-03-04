@@ -35,6 +35,6 @@
   <div class="mobileMenuToggler rightMenuToggler" hammer-tap.call="toggleRightMenu()" if.bind="crewBuilderService.isBuilding">Crew</div>
   <div class="remainingSoulStonesSummary ${showRemaining?'shown':''}">${remaining}/${crewBuilderService.currentCrew.soulStones}</div>
   <p clsas="appVersion">App Version: ${dataService.getAppVersion()}</p>
-  <p>If you want to contact us for any reason; please use our Facebook page: <a href="https://www.facebook.com/m3eBetaAnalyzer" target="_blank">https://www.facebook.com/m3eBetaAnalyzer/</a>. Thanks!</p>
+  <p>If you want to contact us for any reason; please use our <a href="https://www.facebook.com/m3eBetaAnalyzer" target="_blank">Facebook page</a>. Thanks!</p>
   <div class="menuBackground ${leftMenuShown || rightMenuShown ? 'shown':''}" hammer-tap.call="hideMenus()"></div>
 </template>

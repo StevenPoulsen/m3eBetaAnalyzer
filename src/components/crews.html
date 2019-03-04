@@ -4,6 +4,6 @@
     <div class="crew" repeat.for="crew of crews">
       <span class="crewName" hammer-tap.call="loadCrew(crew.saveName)">${crew.saveName}</span><span class="remove" hammer-tap.call="deleteCrew(crew.saveName)"></span>
     </div>
-    <div hammer-tap.call="createCrew()" class="button">New Crew</div>
+    <div click.trigger="createCrew()" class="button">New Crew</div>
   </div>
 </template>

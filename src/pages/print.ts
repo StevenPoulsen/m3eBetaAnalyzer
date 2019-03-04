@@ -33,6 +33,7 @@ export class Print {
     const models:any[] = [];
     const upgrades:any[] = [];
     localForage.getItem("printCrew").then((crew:any) => {
+      let printId = 0;
       if (crew && crew.models) {
         this.crew = crew;
         let amount:number = 0;
@@ -49,13 +50,17 @@ export class Print {
 
               if (crewModel.upgrade) {
                 this.dataService.getUpgrade(crewModel.upgrade.name).then(upgrade => {
-                  upgrades.push(upgrade);
+                  const printUpdate = Object.assign({}, upgrade);
+                  printUpdate.printId = printId++;
+                  upgrades.push(printUpdate);
                   this.upgrades = upgrades;
                 })
               }
               this.dataService.getModel(crewModel.name).then(model => {
-                models.push(model);
-                this.images[model.name] = null;
+                const printModel = Object.assign({}, model);
+                printModel.printId = printId++;
+                models.push(printModel);
+                this.images[model.printId] = null;
                 if (models.length === amount) {
                   this.models = models;
                   this.addSpecialUpgrades();
@@ -74,10 +79,13 @@ export class Print {
       if (data && data.upgrades) {
         const upgrades = this.upgrades.slice(0);
         const exclude:string[] = [];
+        let printId = 0;
         for (const upgrade of data.upgrades) {
           if (upgrade.limitations.special) {
-            exclude.push(upgrade.name);
-            upgrades.push(upgrade);
+            const printUpgrade = Object.assign({}, upgrade);
+            printUpgrade.printId = "s" + printId++;
+            exclude.push(printUpgrade.printId);
+            upgrades.push(printUpgrade);
           }
         }
         this.upgrades = upgrades;
@@ -91,7 +99,7 @@ export class Print {
   }
 
   togglePictureTextColor(model) {
-    this.whitePictureText[model.name] = !this.whitePictureText[model.name];
+    this.whitePictureText[model.printId] = !this.whitePictureText[model.printId];
   }
 
   getText(text):string {
@@ -187,25 +195,25 @@ export class Print {
 
   includeUpgrade(upgrade) {
     const excludes = this.excludeUpgrades.slice(0);
-    excludes.splice(excludes.indexOf(upgrade.name),1);
+    excludes.splice(excludes.indexOf(upgrade.printId),1);
     this.excludeUpgrades = excludes;
   }
 
   excludeUpgrade(upgrade){
     const excludes = this.excludeUpgrades.slice(0);
-    excludes.push(upgrade.name);
+    excludes.push(upgrade.printId);
     this.excludeUpgrades = excludes;
   }
 
   includeModel(model) {
     const excludes = this.excludeModels.slice(0);
-    excludes.splice(excludes.indexOf(model.name),1);
+    excludes.splice(excludes.indexOf(model.printId),1);
     this.excludeModels = excludes;
   }
 
   excludeModel(model) {
     const excludes =this.excludeModels.slice(0);
-    excludes.push(model.name);
+    excludes.push(model.printId);
     this.excludeModels = excludes;
   }
 }

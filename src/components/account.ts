@@ -33,8 +33,10 @@ export class Account {
   }
 
   signIn() {
-    this.dialogService.open({viewModel:AccountDialog, model:{}, lock:false}).whenClosed(()=>{
-      this.checkSignedIn();
+    this.dialogService.open({viewModel:AccountDialog, model:{headline:'Sign in'}, lock:false}).whenClosed(response => {
+      if (!response.wasCancelled) {
+        this.checkSignedIn();
+      }
     });
   }
 

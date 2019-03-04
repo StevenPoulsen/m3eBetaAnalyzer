@@ -2,10 +2,11 @@
   <require from="../styles/firebaseui.css"></require>
   <ux-dialog class="dialog">
     <ux-dialog-head>
-      Sign In
+      ${headline}
     </ux-dialog-head>
     <ux-dialog-body>
       <div id="signIn"></div>
+      <div class="button" hammer-tap.call="cancel()">Cancel</div>
     </ux-dialog-body>
   </ux-dialog>
 </template>

@@ -15,11 +15,11 @@
     <span class="button" hammer-tap.call="back()">Back</span>
   </div>
   <div if.bind="edition === 'm2e' && includeModels" class="m2e">
-    <div class="printModel ${excludeModels.indexOf(model.name)!=-1?'exclude':''}" repeat.for="model of models">
+    <div class="printModel ${excludeModels.indexOf(model.printId)!=-1?'exclude':''}" repeat.for="model of models">
       <div class="front">
         <div class="picture">
-          <img if.bind="images[model.name]" src.bind="images[model.name][0] | blobToUrl" />
-          <label><input type="file" files.bind="images[model.name]" accept="image/*" /></label>
+          <img if.bind="images[model.printId]" src.bind="images[model.printId][0] | blobToUrl" />
+          <label><input type="file" files.bind="images[model.printId]" accept="image/*" /></label>
         </div>
         <div class="cost">
           <div class="costHeadline">Cost</div>
@@ -67,7 +67,7 @@
           <action-table if.bind="model.tacticals" actions.bind="model.tacticals" name.bind="'Tactical Actions'" media.bind="'print'"></action-table>
         </div>
       </div>
-      <div class="overlay" if.bind="excludeModels.indexOf(model.name)!==-1">
+      <div class="overlay" if.bind="excludeModels.indexOf(model.printId)!==-1">
         <div>Excluded from print</div>
         <div class="button" hammer-tap.call="includeModel(model)">Include</div>
       </div>
@@ -75,7 +75,7 @@
     </div>
   </div>
   <div if.bind="edition === 'm2e' && includeUpgrades" class="m2e">
-    <div class="printUpgrade ${excludeUpgrades.indexOf(upgrade.name)!==-1?'exclude':''}" repeat.for="upgrade of upgrades">
+    <div class="printUpgrade ${excludeUpgrades.indexOf(upgrade.printId)!==-1?'exclude':''}" repeat.for="upgrade of upgrades">
       <div class="name">${upgrade.name}</div>
       <div class="cost"><span>Cost: <span class="value">${upgrade.cost}</span> SS</span></div>
       <div class="text ${text.endsWith(':')?'arrow':''} actionsWrapper" repeat.for="text of upgrade.texts">
@@ -87,7 +87,7 @@
         <span>${getLimitations(upgrade)}</span>
       </div>
       <div class="beta">Beta v. ${dataService.currentVersion}</div>
-      <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.name)!==-1">
+      <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.printId)!==-1">
         <div>Excluded from print</div>
         <div class="button" hammer-tap.call="includeUpgrade(upgrade)">Include</div>
       </div>
@@ -95,19 +95,19 @@
     </div>
   </div>
   <div if.bind="edition === 'm3e' && includeModels" class="m3e">
-    <div class="printModel ${excludeModels.indexOf(model.name)!=-1?'exclude':''}" repeat.for="model of models">
+    <div class="printModel ${excludeModels.indexOf(model.printId)!=-1?'exclude':''}" repeat.for="model of models">
       <div class="front">
         <div class="imageTextColorPicker" hammer-tap.call="togglePictureTextColor(model)">&#9787;/&#9786;</div>
         <div class="picture">
-          <img if.bind="images[model.name]" src.bind="images[model.name][0] | blobToUrl" />
-          <label><input type="file" files.bind="images[model.name]" accept="image/*" /></label>
+          <img if.bind="images[model.printId]" src.bind="images[model.printId][0] | blobToUrl" />
+          <label><input type="file" files.bind="images[model.printId]" accept="image/*" /></label>
         </div>
-        <div class="topLeft ${whitePictureText[model.name]?'white':''}">
+        <div class="topLeft ${whitePictureText[model.printId]?'white':''}">
           <div class="name">${model.name}</div>
           <div class="characteristics" innerhtml.bind="characteristics(model)"></div>
           <div class="keywords">${model.keywords.join(", ")}</div>
         </div>
-        <div class="topRight ${whitePictureText[model.name]?'white':''}">
+        <div class="topRight ${whitePictureText[model.printId]?'white':''}">
           <div class="costValue">${model.stats.cost.value}</div>
           <div class="costHeadline">COST</div>
         </div>
@@ -159,7 +159,7 @@
         </div>
         <div class="base">${model.size.base}<span>MM</span></div>
       </div>
-      <div class="overlay" if.bind="excludeModels.indexOf(model.name)!==-1">
+      <div class="overlay" if.bind="excludeModels.indexOf(model.printId)!==-1">
         <div>Excluded from print</div>
         <div class="button" hammer-tap.call="includeModel(model)">Include</div>
       </div>
@@ -167,7 +167,7 @@
     </div>
   </div>
   <div if.bind="edition === 'm3e' && includeUpgrades" class="m3e">
-    <div class="printUpgrade ${excludeUpgrades.indexOf(upgrade.name)!=-1?'exclude':''}" repeat.for="upgrade of upgrades">
+    <div class="printUpgrade ${excludeUpgrades.indexOf(upgrade.printId)!=-1?'exclude':''}" repeat.for="upgrade of upgrades">
       <div class="leftColumn">
         <div class="name">${upgrade.name}</div>
         <div class="cost">${upgrade.cost}</div>
@@ -182,7 +182,7 @@
       </div>
       <div class="beta">Beta v. ${dataService.currentVersion}</div>
       <img class="faction" src="${'/images/'+dataService.getFactionImage(crew.faction)}" alt="" />
-      <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.name)!==-1">
+      <div class="overlay" if.bind="excludeUpgrades.indexOf(upgrade.printId)!==-1">
         <div>Excluded from print</div>
         <div class="button" hammer-tap.call="includeUpgrade(upgrade)">Include</div>
       </div>

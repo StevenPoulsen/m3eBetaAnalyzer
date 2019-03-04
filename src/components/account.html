@@ -3,7 +3,7 @@
     <div class="headline">Account<span class="help" hammer-tap.call="helpService.showHelp('account')"></span></div>
     <div if.bind="userName">${userName}</div>
     <div hammer-tap.call="saveToCloud()" class="button" if.bind="signedIn === 1 && canSave">Save to cloud</div>
-    <div hammer-tap.call="signIn()" class="button" if.bind="signedIn === -1">Sign In</div>
+    <div click.trigger="signIn()" class="button" if.bind="signedIn === -1">Sign In</div>
     <div hammer-tap.call="signOut()" class="button" if.bind="signedIn === 1">Sign Out</div>
     <div id="secretSignIn"></div>
   </div>
