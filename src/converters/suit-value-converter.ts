@@ -1,5 +1,19 @@
 export class SuitValueConverter {
   private type;
+  private markers:any[] = [
+    {marker:"b", img:"blast"},
+    {marker:"F", img:"bonus"},
+    {marker:"a", img:"aura"},
+    {marker:"z", img:"gun"},
+    {marker:"y", img:"melee"},
+    {marker:"p", img:"pulse"},
+    {marker:"\\-", img:"minus"},
+    {marker:"\\+", img:"plus"},
+    {marker:"M", img:"mask"},
+    {marker:"C", img:"crow"},
+    {marker:"T", img:"tomes"},
+    {marker:"R", img:"ram" }
+  ];
 
   toView(obj,type) {
     this.type = type || 'screen';
@@ -9,30 +23,15 @@ export class SuitValueConverter {
     if (obj === "-") {
       return obj;
     }
-    return this.replace(
-      this.replace(
-        this.replace(
-          this.replace(
-            this.replace(
-              this.replace(
-                this.replace(
-                  this.replace(
-                    this.replace(
-                      this.replace(
-                        this.replace(
-                          this.replace(obj, "b", "blast")
-                              ,"F", "bonus")
-                              ,"a", "aura")
-                              ,"z", "gun")
-                              ,"y", "melee")
-                              ,"p", "pulse")
-                              ,"\\-", "minus")
-                              ,"\\+", "plus")
-                              ,"M", "mask")
-                              ,"C", "crow")
-                              ,"T", "tomes")
-                              ,"R", "ram");
-    
+
+    if (obj.match(/^[0-9]{1,2}[MCTR]{1,3}$/i))  {
+      return this.statReplace(obj);
+    }
+
+    for (const marker of this.markers) {
+      obj = this.replace(obj, marker.marker, marker.img);
+    }
+    return obj;
   }
 
   private replace(string, marker, img) {
@@ -45,6 +44,7 @@ export class SuitValueConverter {
       }
       runs = matches.length;
     }
+
     while (runs > 0) {
       result = result.replace(
         new RegExp("(.*(^| ))(\\()?("+(marker.match(/[+\-]/)?"":"\\+")+")?([0-9]{0,2})("+marker+"+)("+(!marker.match(/[+\-]/)?"[0-9]{1,2}\"?":"")+")"+(marker==='a'?'':'?')+"(\\))?(( |$|\\.|,).*)","ig"),
@@ -64,6 +64,21 @@ export class SuitValueConverter {
 
     result = result.replace(new RegExp("(non-)"+marker+"([ \".,!?]|$)","gi"),"$1"+this.suit(img)+"$2");
 
+    return result;
+  }
+
+  private statReplace(string) {
+    let result = "";
+    for (let i = 0, len = string.length, char; i < len; i++) {
+      char = string[i].toUpperCase();
+      for (const marker of this.markers) {
+        if (marker.marker.toUpperCase() === char) {
+          char = this.suit(marker.img);
+          break;
+        }
+      }
+      result += char;
+    }
     return result;
   }
 

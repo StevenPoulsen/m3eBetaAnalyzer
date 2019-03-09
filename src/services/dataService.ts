@@ -16,7 +16,7 @@ export enum Type {
 }
 
 export class DataService {
-  private appVersion: string = "0.13";
+  private appVersion: string = "0.15";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
@@ -44,7 +44,7 @@ export class DataService {
     'minion': 'Minions',
     'other': 'Others'
   };
-  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19", "2.14.19","3.1.19"];
+  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19", "2.14.19","3.1.19","3.7.19"];
   public currentVersion: string;
 
   constructor() {
@@ -312,18 +312,18 @@ export class DataService {
             }
             break;
           case "actions":
-            if (t.startsWith("Attack Actions -")) {
+            if (t.startsWith("Attack Actions ")) {
               state = "attacks";
               continue;
             }
-            if (t.startsWith("Tactical Actions -")) {
+            if (t.startsWith("Tactical Actions ")) {
               state = "tacticals";
               continue;
             }
             break;
           case "attacks":
           case "tacticals":
-            if (t.startsWith("Tactical Actions -")) {
+            if (t.startsWith("Tactical Actions ")) {
               state = "tacticals";
               continue;
             }
