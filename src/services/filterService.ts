@@ -29,7 +29,7 @@ export class FilterService {
   stats: any = ["cost","df","wp","health","mv"];
   statsRanged = {"cost":{max:0,min:0}, "df":{max:0,min:0}, "wp":{max:0,min:0}, "health":{max:0,min:0}, "mv":{max:0,min:0}};
   filterChangeFunction: any = null;
-  quickShows:string[] = ["factions","types","keywords","cost","mv","df","wp","sz"];
+  quickShows:string[] = ["factions","types","keywords","cost","mv","df","wp","sz","health"];
   customTypes:string[] = ["owned","painted","favourites","other"];
   loaded:any = {filters:false,options:false,custom:false};
 

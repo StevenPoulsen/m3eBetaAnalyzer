@@ -238,6 +238,7 @@
   left:0;
   right:0;
   height: 9.6mm;
+  background: #fff none;
 }
 
 .m3e .front .health .wounds {

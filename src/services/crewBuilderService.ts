@@ -271,7 +271,7 @@ export class CrewBuilderService {
     if (!this.currentCrew || !this.currentCrew.leader) {
       return 0;
     }
-    if ((model.totemFor && model.totemFor === this.currentCrew.leader) || this.currentCrew.leader === model.name) {
+    if ((model.totemFor && this.currentCrew.leader.startsWith(model.totemFor)) || this.currentCrew.leader === model.name) {
       return -1 * model.stats.cost.value;
     }
     if (model.keywords) {
@@ -333,7 +333,7 @@ export class CrewBuilderService {
     if (model.totemFor) {
       let masterIsHired = false;
       for (const crewModel of this.currentCrew.models.master) {
-        if (crewModel.name === model.totemFor) {
+        if (crewModel.name.startsWith(model.totemFor)) {
           masterIsHired = true;
           break;
         }

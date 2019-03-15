@@ -5,12 +5,16 @@ import {autoinject} from 'aurelia-framework';
 import {PLATFORM} from 'aurelia-pal';
 import {TrackingService} from "./services/trackingService";
 import {MenuService} from "./services/menuService";
+import { EventAggregator } from 'aurelia-event-aggregator';
 
 @autoinject
 export class App {
   private current;
+  private currentModelId:string = null;
 
-  constructor(private router: AppRouter, private menuService: MenuService){
+  constructor(private router: AppRouter,
+              private menuService: MenuService,
+              private ea: EventAggregator,){
     TrackingService.init();
     this.addStructuredData();
     this.initServiceWorker();
@@ -21,13 +25,17 @@ export class App {
     const step = {
       run(navigationInstruction: NavigationInstruction, next: Next): Promise<any> {
         self.current = navigationInstruction.config.name;
+        if (navigationInstruction.router.isNavigatingBack && self.currentModelId) {
+          self.ea.publish("hideModel", self.currentModelId);
+        }
+        self.currentModelId = navigationInstruction.queryParams ? navigationInstruction.queryParams.id : null;
         return next();
       }
     };
     config.addPostRenderStep(step);
     config.title = 'LiveTeam';
     config.map([
-      { route: '', name: 'summary', moduleId: PLATFORM.moduleName('pages/summary'), nav: true,  title: "Malifaux3E Beta Analyzer - Summary"},
+      { route: ['','model/:id'], name: 'summary', moduleId: PLATFORM.moduleName('pages/summary'), nav: true,  title: "Malifaux3E Beta Analyzer - Summary"},
       { route: 'data', name: 'data', moduleId: PLATFORM.moduleName('pages/data'), nav: true,  title: "Malifaux3E Beta Analyzer - Data"},
       { route: 'share', name: 'share', moduleId: PLATFORM.moduleName('pages/share'), nav: true,  title: "Malifaux3E Beta Analyzer - Share"},
       { route: 'print', name: 'print', moduleId: PLATFORM.moduleName('pages/print'), nav: true,  title: "Malifaux3E Beta Analyzer - Print"}
