@@ -16,7 +16,8 @@
     <div class="details" if.bind="shown">
       <div class="text ${text.endsWith(':')?'clearAbove':''}" repeat.for="text of upgrade.texts">
         <span innerhtml.bind="getText(text) | suit"></span>
-        <action-table if.bind="upgrade.actions && isActionText(text)" actions.bind="upgrade.actions" name.bind="upgrade.actions[0].type"></action-table>
+        <action-table if.bind="upgrade.attacks && isActionText(text)" actions.bind="upgrade.attacks" name.bind="'Attack Actions'"></action-table>
+        <action-table if.bind="upgrade.tacticals && isActionText(text)" actions.bind="upgrade.tacticals" name.bind="'Tactical Actions'"></action-table>
       </div>
       <div class="limitations">
         <div>Limitations</div>

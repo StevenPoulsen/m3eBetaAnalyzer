@@ -566,6 +566,7 @@ ux-dialog-head {
 }
 .editUpgrades {
   width: 500px;
+  max-width: 80vw;
 }
 .editUpgrades .upgrade {
   padding: 4px;
@@ -593,6 +594,7 @@ ux-dialog-head {
 
 .shareBody {
   width: 500px;
+  max-width: 80vw;
 }
 
 .shareBody .headline {

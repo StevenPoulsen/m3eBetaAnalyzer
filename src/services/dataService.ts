@@ -16,7 +16,7 @@ export enum Type {
 }
 
 export class DataService {
-  private appVersion: string = "0.16";
+  private appVersion: string = "0.17";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
@@ -327,7 +327,7 @@ export class DataService {
               state = "tacticals";
               continue;
             }
-            let actionStats = this.splitActionStats(t);
+            const actionStats = this.splitActionStats(t);
             if (actionStats) {
               actionState = "stats";
             }
@@ -338,7 +338,8 @@ export class DataService {
                 break;
               case "rule":
               case "triggers":
-                let newTrigger = t.match(/^([cmtr]+) (.*)/i);
+                // let newTrigger = t.match(/^([cmtr]+) (.*)/i);
+                const newTrigger = t.match(/^([^:]+): (.*)/i);
                 if (!newTrigger) {
                   if (actionState === "triggers") {
                     model[state][model[state].length - 1][actionState][model[state][model[state].length - 1][actionState].length - 1].rule = this.appendText(model[state][model[state].length - 1][actionState][model[state][model[state].length - 1][actionState].length - 1].rule, t);
@@ -346,12 +347,12 @@ export class DataService {
                     model[state][model[state].length - 1][actionState] = this.appendText(model[state][model[state].length - 1][actionState], t);
                   }
                 } else {
-                  let triggerName = newTrigger[2].split(":");
+                  const trigger = newTrigger[1].match(/^([cmtr]+) (.*)/i);
                   model[state][model[state].length - 1].triggers = model[state][model[state].length - 1].triggers || [];
                   model[state][model[state].length - 1].triggers.push({
-                    suit: newTrigger[1],
-                    name: triggerName[0],
-                    rule: triggerName[1]
+                    suit: trigger?trigger[1]:null,
+                    name: trigger?trigger[2]:newTrigger[1],
+                    rule: newTrigger[2]
                   });
                   actionState = "triggers";
                 }
@@ -395,7 +396,7 @@ export class DataService {
   public consumeFactionUpgrades(version: string, faction: string, upgrades: string): void {
     const data = {name: faction, upgrades: [], timestamp: new Date().getTime()};
     const lines: string[] = upgrades.split("\n"), factionInfo = this.getFaction(faction);
-    let state: string = "new", upgrade:any, emptyLines: number = 0, text:string = "", limitations:string = "", action:any, actionState:string;
+    let state: string = "new", upgrade:any, emptyLines: number = 0, text:string = "", limitations:string = "", action:any, actionState:string, actionType;
     console.log("Reading faction upgrades", lines.length, "lines for", faction, "in version", version);
     for (const line of lines) {
       const t = line.trim();
@@ -413,8 +414,8 @@ export class DataService {
               text = "";
             }
           } else if (state === "action") {
-            if (action && upgrade){
-              upgrade.actions.push(action);
+            if (action && upgrade && actionType){
+              upgrade[actionType].push(action);
               action = null;
               state = "content";
             }
@@ -426,7 +427,7 @@ export class DataService {
           case "new":
             if (t.match(/^Cost: SS.*/)) {
               state = "content";
-              upgrade = {texts: [], name: "", cost: 0, limitations: {}, actions: []};
+              upgrade = {texts: [], name: "", cost: 0, limitations: {}};
             }
             break;
           case "name":
@@ -457,8 +458,14 @@ export class DataService {
             }
             break;
           case "action":
-            if (!action) {
-              action = {type:t.split("Rg")[0].trim()};
+            let typeSplit = t.split(" Rg ");
+            if (typeSplit.length > 1) {
+              if (action && action.name && actionType) {
+                upgrade[actionType].push(Object.assign({},action));
+              }
+              actionType = typeSplit[0].trim().toLowerCase().startsWith("attack") ? "attacks" : "tacticals";
+              upgrade[actionType] = upgrade[actionType] || [];
+              action = {};
               break;
             }
             let actionStats = this.splitActionStats(t);
@@ -467,6 +474,10 @@ export class DataService {
             }
             switch (actionState) {
               case "stats":
+                if (action.name) {
+                  upgrade[actionType].push(Object.assign({},action));
+                  action = {};
+                }
                 Object.assign(action, actionStats);
                 actionState = "rule";
                 break;

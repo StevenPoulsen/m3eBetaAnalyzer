@@ -10,7 +10,7 @@
   <div class="actionRules">
     <div class="actionRule" innerhtml.bind="action.rule | suit:media"></div>
     <div class="actionTrigger" repeat.for="trigger of action.triggers">
-      <span class="actionTriggerSuit suit" innerhtml.bind="trigger.suit | suit:media"></span>
+      <span class="actionTriggerSuit suit" if.bind="trigger.suit" innerhtml.bind="trigger.suit | suit:media"></span>
       <span class="actionTriggerName">${trigger.name}:</span>
       <span class="actionTriggerRule" innerhtml.bind="trigger.rule | suit:media"></span>
     </div>

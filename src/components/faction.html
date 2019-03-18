@@ -2,7 +2,7 @@
   <div class="${groupType} ${faction.name}">
     <div class="groupTitleWrapper">
       <div class="factionTitle expandable ${shown?'shown':''}" hammer-tap.call="toggle()"><img src="${img}" alt="Faction logo" if.bind="img"/><span>${name} <span class="filterCount">${faction.models.length}</span></span></div>
-      <div class="button factionUpgrades" if.bind="groupType === 'faction'" hammer-tap.call="showFactionUpgrades()">Upgrades</div>
+      <div class="button factionUpgrades" if.bind="groupType === 'faction'" click.trigger="showFactionUpgrades()">Upgrades</div>
     </div>
     <div show.bind="shown">
       <slot></slot>
