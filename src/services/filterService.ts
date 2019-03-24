@@ -243,16 +243,20 @@ export class FilterService {
                         let modelStats = model.stats, modelStat, outOfStatRange = false;
                         if (!isFiltered) {
                           for (const statKey of this.stats) {
-                            modelStat = +modelStats[statKey].value;
-                            this.statsRanged[statKey] = {
-                              min: 0,
-                              max: Math.max(+this.statsRanged[statKey].max, +modelStat)
-                            };
-                            if ((filterStats[statKey] && filterStats[statKey].min && +modelStat < +filterStats[statKey].min)
-                              || (filterStats[statKey] && filterStats[statKey].max && +modelStat > +filterStats[statKey].max)) {
-                              outOfStatRange = true;
-                              isFiltered = true;
-                              this.missing(statKey, model);
+                            if (modelStats[statKey]) {
+                              modelStat = +modelStats[statKey].value;
+                              this.statsRanged[statKey] = {
+                                min: 0,
+                                max: Math.max(+this.statsRanged[statKey].max, +modelStat)
+                              };
+                              if ((filterStats[statKey] && filterStats[statKey].min && +modelStat < +filterStats[statKey].min)
+                                || (filterStats[statKey] && filterStats[statKey].max && +modelStat > +filterStats[statKey].max)) {
+                                outOfStatRange = true;
+                                isFiltered = true;
+                                this.missing(statKey, model);
+                              }
+                            } else {
+                              console.log("could not filter stat ", statKey, " from model ", model.name, modelStats);
                             }
                           }
                         }

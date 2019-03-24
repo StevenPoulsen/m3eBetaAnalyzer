@@ -180,11 +180,7 @@ export class CrewBuilderService {
     if (!this.currentCrew) {
       return;
     }
-    const model = this.getCurrentCrewModel(crewModel.id);
-    if (!model) {
-      return;
-    }
-    model.upgrade = this.extractUpgrade(upgrade);
+    crewModel.upgrade = this.extractUpgrade(upgrade);
     this.publishUpdateEvent();
     this.lastModified = new Date().getTime();
   }

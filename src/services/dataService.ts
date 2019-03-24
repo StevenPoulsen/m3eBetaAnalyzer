@@ -16,7 +16,7 @@ export enum Type {
 }
 
 export class DataService {
-  private appVersion: string = "0.17";
+  private appVersion: string = "0.18";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
@@ -44,7 +44,7 @@ export class DataService {
     'minion': 'Minions',
     'other': 'Others'
   };
-  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19", "2.14.19","3.1.19","3.7.19"];
+  public versionCodes: string[] = ["1.23", "1.31", "2.6.19", "2.7.19", "2.14.19","3.1.19","3.7.19","3.22.19"];
   public currentVersion: string;
 
   constructor() {
@@ -548,7 +548,7 @@ export class DataService {
     }
     const match = line.match(/^(.+) (([a-z]?[0-9][0-9]?")|(x)|(-)) (([0-9][0-9]?[a-z\-+]*)|(x)|(-)) ([^ ]*) (([0-9][0-9]?[a-z]?)|(-)|(x))?$/i);
     if (match && match.length === 15) {
-      if (match[1].match(/[Ff][A-Z"].*/)) {
+      if (match[1].match(/ ?[Ff] ?[A-Z"].*/)) {
         return {name: match[1].substr(1), rg: match[2], stat: match[6], rst: match[10], tn: match[11], bonus: true};
       }
       return {name: match[1], rg: match[2], stat: match[6], rst: match[10], tn: match[11]};
