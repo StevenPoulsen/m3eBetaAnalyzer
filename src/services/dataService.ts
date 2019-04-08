@@ -16,7 +16,7 @@ export enum Type {
 }
 
 export class DataService {
-  private appVersion: string = "0.21";
+  private appVersion: string = "0.22";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
@@ -548,7 +548,7 @@ export class DataService {
     }
     const match = line.match(/^(.+) (([a-z]?[0-9][0-9]?")|(x)|(-)) (([0-9][0-9]?[a-z\-+]*)|(x)|(-)) ([^ ]*) (([0-9][0-9]?[a-z]?)|(-)|(x))?$/i);
     if (match && match.length === 15) {
-      if (match[1].match(/ ?[Ff] ?[A-Z"].*/)) {
+      if (match[1].match(/^ ?[Ff] ?[A-Z"].*$/)) {
         return {name: match[1].substr(1), rg: match[2], stat: match[6], rst: match[10], tn: match[11], bonus: true};
       }
       return {name: match[1], rg: match[2], stat: match[6], rst: match[10], tn: match[11]};
