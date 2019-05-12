@@ -1,0 +1,30 @@
+<template>
+  <require from="../components/strategy"></require>
+  <require from="../components/scheme"></require>
+  <ux-dialog>
+    <ux-dialog-head>
+      Strategies and Schemes
+    </ux-dialog-head>
+    <ux-dialog-body>
+      <div class="stratsAndSchemes">
+        <div if.bind="!chosen">
+          <div class="button" hammer-tap.call="selectRandom()">Select Random</div>
+          <div class="headline">Strategies</div>
+          <strategy repeat.for="strat of strats" strategy.bind="strat" selectable.bind="true"></strategy>
+          <div class="headline">Schemes</div>
+          <scheme repeat.for="scheme of schemes" scheme.bind="scheme" selectable.bind="true"></scheme>
+          <div class="button" hammer-tap.call="continue()">Continue</div>
+          <div class="error" innerhtml.bind="error"></div>
+        </div>
+
+        <div if.bind="chosen">
+          <div class="headline">Strategy</div>
+          <strategy strategy.bind="chosenStrategy" selectable.bind="false"></strategy>
+          <div class="headline">Schemes</div>
+          <scheme repeat.for="scheme of chosenSchemes" scheme.bind="scheme" selectable.bind="false"></scheme>
+          <div class="button" hammer-tap.call="reset()">Reset</div>
+        </div>
+      </div>
+    </ux-dialog-body>
+  </ux-dialog>
+</template>

@@ -1,0 +1,12 @@
+<template>
+  <require from="../converters/suit-value-converter"></require>
+  <div class="strategy">
+    <div class="groupTitleWrapper">
+      <div class="factionTitle expandable ${shown?'shown':''}" hammer-tap.call="toggle()"><span>${strategy.name} (<span innerhtml.one-time="strategy.suit | suit"></span>)</span></div>
+      <div class="button selectable ${chosen?'chosen':''}" click.trigger="select()" if.bind="selectable">${chosen?"-":"+"}</div>
+    </div>
+    <div show.bind="shown">
+      <div class="text" innerhtml.one-time="strategy.text | suit"></div>
+    </div>
+  </div>
+</template>

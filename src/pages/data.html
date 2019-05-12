@@ -36,6 +36,30 @@
   <button hammer-tap.call="handleFactionConsume()">Consume model data</button><span>${error}</span>
   </div>
 
+  <h1>Strategies and Schemes data</h1>
+  <div class="inputWrapper">
+    <label>
+      Version:
+      <select value.bind="version">
+        <option model.bind="null">Select version</option>
+        <option repeat.for="version of dataService.versionCodes" model.bind="version">${version}</option>
+      </select>
+    </label>
+  </div>
+  <div class="inputWrapper">
+    <label>Strategies:
+      <textarea placeholder="Copy entire text from strategies section of rules pdf to here" value.bind="strategies"></textarea>
+    </label>
+  </div>
+  <div class="inputWrapper">
+    <label>Schemes:
+      <textarea placeholder="Copy entire text from Schemes section of rules pdf to here" value.bind="schemes"></textarea>
+    </label>
+  </div>
+  <div class="inputWrapper">
+    <button hammer-tap.call="handleStratAndSchemesConsume()">Consume Strats and Schemes</button><span>${errorSandS}</span>
+  </div>
+
   <h1>Consumed faction data</h1>
   <div if.bind="versions" repeat.for="version of versions">
     <h2>Beta version: ${version.version}</h2>

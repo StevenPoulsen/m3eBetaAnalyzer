@@ -10,6 +10,9 @@ export class Data {
   private version: string;
   private versions:any = [];
   private showData = {};
+  private strategies: string = "";
+  private schemes: string = "";
+  private errorSandS: string = "";
 
   constructor(private dataService: DataService){}
 
@@ -54,6 +57,16 @@ export class Data {
     this.faction = "";
     this.upgrades = "";
     this.reloadVersions(this);
+  }
+
+  handleStratAndSchemesConsume() {
+    if (!this.strategies || !this.schemes || !this.version) {
+      this.errorSandS = "Missing input";
+      return false;
+    }
+    this.dataService.consumeStrategiesAndSchemes(this.version, this.strategies, this.schemes);
+    this.strategies = "";
+    this.schemes = "";
   }
 }
 

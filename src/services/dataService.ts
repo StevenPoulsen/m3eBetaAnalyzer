@@ -5,7 +5,8 @@ interface VersionDataEntry {
   version: string,
   timestamp: number,
   factions: any,
-  appVersion: string
+  appVersion: string,
+  stratsAndSchemes: any
 }
 export enum Type {
   Master = "master",
@@ -16,7 +17,7 @@ export enum Type {
 }
 
 export class DataService {
-  private appVersion: string = "0.22";
+  private appVersion: string = "0.23";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},
@@ -202,6 +203,12 @@ export class DataService {
           }
         }
       }
+    });
+  }
+
+  public getStratsAndSchemes():Promise<any> {
+    return this.getData().then(data => {
+      return data.stratsAndSchemes;
     });
   }
 
@@ -571,6 +578,92 @@ export class DataService {
     return null;
   }
 
+  public consumeStrategiesAndSchemes(version: string, strategies:string, schemes:string) {
+    const strategiesAndSchemes = {
+      strats: [],
+      schemes: []
+    };
+    let lines: string[] = strategies.split("\n");
+    let strat = null;
+    for (const line of lines) {
+      const t = line.trim();
+      try {
+        if (!t || t.toUpperCase() === "STRATEGIES" || t.match(/^[0-9]+ MALIFAUX THIRD EDITION.*/i)) {
+          if (strat) {
+            strategiesAndSchemes.strats.push(Object.assign({},strat));
+            strat = null;
+          }
+          continue;
+        }
+        let name = t.match(/(.+) \(([mctr])\)/i);
+        if (name) {
+          strat = {name: name[1], suit: name[2], text: ""};
+        } else if (strat) {
+          strat.text += t;
+          if (t.endsWith(".") || t.endsWith(":")) {
+            strat.text += "<br />";
+          } else if (t.endsWith("-")) {
+            strat.text = strat.text.substr(0, strat.text.length -1);
+          } else {
+            strat.text += " ";
+          }
+        }
+      } catch (e) {
+        console.log(e, "Could not read line: ", t);
+      }
+    }
+    if (strat) {
+      strategiesAndSchemes.strats.push(strat);
+    }
+
+    lines = schemes.split("\n");
+    let scheme = null, state = "new";
+    for (const line of lines) {
+      let t = line.trim();
+      try {
+        if (!t || t.toUpperCase() === "SCHEMES" || t.match(/^[0-9]+ MALIFAUX THIRD EDITION.*/i)) {
+          if (scheme) {
+            strategiesAndSchemes.schemes.push(scheme);
+            scheme = null;
+          }
+          continue;
+        }
+        let name = t.match(/([0-9][0-9]?)\. (.*)/i);
+        if (name) {
+          if (scheme) {
+            strategiesAndSchemes.schemes.push(scheme);
+          }
+          scheme = {name: name[2], number: +name[1], text: "", reveal: "", end: ""};
+          state = "text";
+          continue;
+        }
+        if (t.startsWith("Reveal: ")) {
+          state = "reveal";
+          t = t.substr(state.length + 2);
+        } else if (t.startsWith("End: ")) {
+          state = "end";
+          t = t.substr(state.length + 2);
+        }
+        if (scheme) {
+          scheme[state] += t;
+          if (t.endsWith(".") || t.endsWith(":")) {
+            scheme[state] += "<br />";
+          } else if (t.endsWith("-")) {
+            scheme[state] = scheme[state].substr(0, scheme[state].length -1);
+          } else {
+            scheme[state] += " ";
+          }
+        }
+      } catch (e) {
+        console.log(e, "Could not read scheme line:", t);
+      }
+    }
+    if (scheme) {
+      strategiesAndSchemes.schemes.push(scheme);
+    }
+    this.addStratsAndSchemes(strategiesAndSchemes);
+  }
+
   private addFactionData(version: string, data: any): void {
     let factions;
     if (this.data) {
@@ -584,7 +677,7 @@ export class DataService {
     } else {
       factions[data.name] = data;
     }
-    this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion};
+    this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion, stratsAndSchemes:this.data.stratsAndSchemes};
     this.saveData();
   }
 
@@ -600,8 +693,12 @@ export class DataService {
     } else {
       factions[data.name] = data;
     }
-    console.log("Adding faction upgrades", data, factions);
-    this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion};
+    this.data = {version: version, timestamp: new Date().getTime(), factions: factions, appVersion: this.appVersion, stratsAndSchemes:this.data.stratsAndSchemes};
+    this.saveData();
+  }
+
+  private addStratsAndSchemes(data:any):void {
+    this.data.stratsAndSchemes = data;
     this.saveData();
   }
 

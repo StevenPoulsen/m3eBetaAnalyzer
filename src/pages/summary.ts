@@ -5,6 +5,8 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 import {MenuService} from "../services/menuService";
 import {CrewBuilderService} from "../services/crewBuilderService";
 import {TrackingService} from "../services/trackingService";
+import {DialogService} from "aurelia-dialog";
+import {StratsAndSchemes} from "../dialogs/stratsAndSchemes";
 
 
 @autoinject
@@ -20,7 +22,8 @@ export class Summary {
               private filterService: FilterService,
               private ea: EventAggregator,
               private menuService: MenuService,
-              private crewBuilderService: CrewBuilderService){
+              private crewBuilderService: CrewBuilderService,
+              private dialogService: DialogService){
     filterService.filterChangeFunction = this.filterUpdateFunction();
     if (window.innerWidth < 1000) {
       ea.subscribe("leftMenuShow", response => {
@@ -64,6 +67,10 @@ export class Summary {
 
   toggleRightMenu() {
     this.menuService.toggleRightMenu();
+  }
+
+  toogleStratsAndSchemes() {
+    this.dialogService.open({viewModel:StratsAndSchemes, lock: false});
   }
 
   hideMenus() {

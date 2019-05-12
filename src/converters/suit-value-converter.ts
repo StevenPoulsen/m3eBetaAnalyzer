@@ -62,7 +62,8 @@ export class SuitValueConverter {
       runs--;
     }
 
-    result = result.replace(new RegExp("(non-)"+marker+"([ \".,!?]|$)","gi"),"$1"+this.suit(img)+"$2");
+    result = result.replace(new RegExp("(non-)"+marker+"([ \".,!?:]|$)","gi"),"$1"+this.suit(img)+"$2");
+    result = result.replace(new RegExp("(^| )"+marker+"(:)","gi"),"$1"+this.suit(img)+"$2");
 
     return result;
   }

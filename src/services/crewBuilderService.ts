@@ -271,7 +271,7 @@ export class CrewBuilderService {
       return -1 * model.stats.cost.value;
     }
     if (model.keywords) {
-      if (this.currentCrew.leaderType === Type.Henchman && model.keywords.includes("EFFIGY")) {
+      if (this.currentCrew.leaderType === Type.Henchman && model.keywords.includes("EFFIGY") && model.factions.includes(this.currentCrew.faction)) {
         return -1 * model.stats.cost.value;
       }
 
