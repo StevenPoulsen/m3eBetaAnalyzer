@@ -466,7 +466,9 @@ export class CrewBuilderService {
           if (crew.saveName === saveName) {
             crews.splice(i, 1);
             localForage.setItem(this.cacheKey(), crews);
+            this.firebaseService.storeUserData(this.cacheKey(), crews);
             resolve(crews);
+            this.ea.publish("userDataChanged");
             break;
           }
         }
