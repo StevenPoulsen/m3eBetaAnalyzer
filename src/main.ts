@@ -6,16 +6,20 @@ import {PLATFORM} from 'aurelia-pal';
 import * as Bluebird from 'bluebird';
 
 // remove out if you don't want a Promise polyfill (remove also from webpack.config.js)
-Bluebird.config({ warnings: { wForgottenReturn: false } });
+Bluebird.config({warnings: {wForgottenReturn: false}});
 
 export function configure(aurelia: Aurelia) {
   aurelia.use
     .standardConfiguration()
-    .plugin(PLATFORM.moduleName('aurelia-hammer'))
     .feature(PLATFORM.moduleName('resources/index'))
     .plugin(PLATFORM.moduleName('aurelia-dialog'), config => {
       config.useDefaults();
-    });
+    })
+    .globalResources([
+        PLATFORM.moduleName('attributes/hammer-swipe'),
+        PLATFORM.moduleName('attributes/hammer-tap')
+      ]
+    );
 
   // Uncomment the line below to enable animation.
   // aurelia.use.plugin(PLATFORM.moduleName('aurelia-animator-css'));

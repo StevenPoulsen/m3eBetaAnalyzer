@@ -157,8 +157,7 @@ module.exports = ({ production, server, extractCss, coverage, analyze, karma } =
       'Promise': 'bluebird'
     }),
     new ModuleDependenciesPlugin({
-      'aurelia-testing': ['./compile-spy', './view-spy'],
-      'aurelia-hammer': ['./hammer-hold','./hammer-press','./hammer-swipe','./hammer-tap','./index']
+      'aurelia-testing': ['./compile-spy', './view-spy']
     }),
     new HtmlWebpackPlugin({
       template: 'index.ejs',
