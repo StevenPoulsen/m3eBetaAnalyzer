@@ -17,7 +17,7 @@ export enum Type {
 }
 
 export class DataService {
-  private appVersion: string = "0.24";
+  private appVersion: string = "0.25";
   private data: VersionDataEntry;
   public factions = {
     "arcanists": {"id":1,"displayName": "Arcanists",key:"arcanists",selectable:true},

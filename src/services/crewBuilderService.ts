@@ -275,9 +275,11 @@ export class CrewBuilderService {
         return -1 * model.stats.cost.value;
       }
 
-      for (const keyword of this.currentCrew.keywords) {
-        if (model.keywords.includes(keyword) || (model.crewKeywords && model.crewKeywords.includes(keyword))) {
-          return 0;
+      if (this.currentCrew.keywords) {
+        for (const keyword of this.currentCrew.keywords) {
+          if (model.keywords.includes(keyword) || (model.crewKeywords && model.crewKeywords.includes(keyword))) {
+            return 0;
+          }
         }
       }
     }
@@ -338,9 +340,11 @@ export class CrewBuilderService {
         return {hide: true, name: "totemForOther"};
       }
     }
-    for (const keyword of this.currentCrew.keywords) {
-      if (model.keywords && model.keywords.includes(keyword)) {
-        return reply || {hide: false, name: ""};
+    if (this.currentCrew.keywords) {
+      for (const keyword of this.currentCrew.keywords) {
+        if (model.keywords && model.keywords.includes(keyword)) {
+          return reply || {hide: false, name: ""};
+        }
       }
     }
     if (!model.factions.includes(this.currentCrew.faction)) {
