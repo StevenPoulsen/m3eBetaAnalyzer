@@ -633,7 +633,7 @@ p {
   line-height: 1.1em;
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 1200px) {
   .mobileMenuToggler {
     display: block;
     position: fixed;

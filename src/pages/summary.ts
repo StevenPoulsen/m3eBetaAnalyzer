@@ -25,7 +25,7 @@ export class Summary {
               private crewBuilderService: CrewBuilderService,
               private dialogService: DialogService){
     filterService.filterChangeFunction = this.filterUpdateFunction();
-    if (window.innerWidth < 1000) {
+    if (window.innerWidth < 1200) {
       ea.subscribe("leftMenuShow", response => {
         this.leftMenuShown = true;
       });
