@@ -109,9 +109,9 @@ export class Model {
   }
 
   static scrollToElement(element:Element) {
-    if (element.getBoundingClientRect) {
-      const boundingRect = element.getBoundingClientRect();
-      if (boundingRect.top < window.scrollY || boundingRect.top > window.scrollY + window.innerHeight) {
+    if (element["offsetTop"]) {
+      const positionTop = element["offsetTop"];
+      if (positionTop < window.scrollY || positionTop > window.scrollY + window.innerHeight) {
         element.scrollIntoView();
       }
     }

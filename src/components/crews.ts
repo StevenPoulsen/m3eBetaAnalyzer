@@ -94,18 +94,17 @@ export class Crews {
         factions:this.dataService.getSelectableFactionKeys(),
         skipable: true
       }, lock: false}).whenClosed(response => {
-        let faction = null;
         if (!response.wasCancelled) {
-          faction = response.output;
+          const faction = response.output;
+          this.menuService.showRightMenu();
+          const filterValues = this.filterService.getResetValues();
+          filterValues.crewLegalOnly = true;
+          filterValues.options.quickShow = ["cost"];
+          filterValues.options.sort.modelSorts = ["tax","wyrd"];
+          filterValues.options.modelGroupBy = "type";
+          this.filterService.updateWithValues(filterValues);
+          this.crewBuilderService.newCrew(this.dataService.getFactionDisplayName(faction));
         }
-        this.menuService.showRightMenu();
-        const filterValues = this.filterService.getResetValues();
-        filterValues.crewLegalOnly = true;
-        filterValues.options.quickShow = ["cost"];
-        filterValues.options.sort.modelSorts = ["tax","wyrd"];
-        filterValues.options.modelGroupBy = "type";
-        this.filterService.updateWithValues(filterValues);
-        this.crewBuilderService.newCrew(this.dataService.getFactionDisplayName(faction));
     });
   }
 
